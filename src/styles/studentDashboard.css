@@ -1,0 +1,205 @@
+body {
+  background: radial-gradient(circle at center, #15803d, #0f3d26, #0D2212);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center;
+  min-height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  color: #d1fae5;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.015), transparent 70%);
+  z-index: -1;
+  pointer-events: none;
+  mask-image: radial-gradient(circle at center, black 30%, transparent 100%);
+}
+
+
+.dashboard-container {
+  max-width: 900px;
+}
+
+/* Welcome Header */
+.welcome-header {
+  color: #a7f3d0;
+}
+
+/* Profile Card */
+.profile-card {
+  background: linear-gradient(135deg, #e8fef0, #d0f5dc);
+  border-radius: 16px;
+  border: 1px solid #d1fae5;
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.15);
+  color: #064e3b;
+  padding: 2.5rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.profile-card h4 {
+  color: #064e3b;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.profile-card p {
+  color: #047857;
+  font-weight: bold;
+  font-size: 1.125rem;
+  margin: 0;
+}
+
+/* Section titles */
+.section-title {
+  color: #a7f3d0;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+/* Search bar */
+.search-input {
+  border: 1px solid #6ee7b7;
+  background: #f0fdf4;
+  padding: 1rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.15);
+  transition: all 0.3s ease;
+  color: #064e3b;
+  width: 100%;
+}
+
+.search-input::placeholder {
+  color: #064e3b;
+  opacity: 0.9;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.35);
+}
+
+/* Class List */
+.class-list .list-group-item {
+  border-radius: 12px;
+  margin-bottom: 12px;
+  border: 1px solid #bbf7d0;
+  background-color: rgba(236, 253, 245, 0.95);
+  transition: transform 0.2s ease;
+}
+
+.class-list .list-group-item:hover {
+  transform: translateY(-1px);
+}
+
+.class-list .fw-semibold {
+  color: #064e3b;
+}
+
+.class-list .text-muted {
+  color: #064e3b !important;
+}
+
+.class-list .list-group-item .d-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;           /* ✅ ปรับให้ปุ่มอยู่ตรงกลางฝั่งขวา */
+  flex-wrap: nowrap;
+  gap: 1rem;
+}
+
+.class-list .list-group-item .flex-grow-1 {
+  min-width: 0;
+  word-break: break-word;
+  flex: 1;
+}
+
+.class-list .list-group-item .d-flex.flex-column {
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  white-space: nowrap;
+  height: 100%;
+}
+
+/* ปุ่มและสถานะเข้าห้องเรียนฝั่งขวา */
+.action-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 140px;
+  text-align: center;
+  gap: 0.5rem;
+}
+
+.class-list .list-group-item .custom-btn-primary {
+  width: 140px;
+  text-align: center;
+}
+
+.list-group-item:hover {
+  background-color: #bbf7d0;
+  transform: scale(1.01);
+}
+
+/* Buttons */
+.custom-btn-primary {
+  background-color: #22c55e;
+  color: white;
+  border: none;
+  font-weight: bold;
+  padding: 6px 16px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  box-shadow:
+    0 0 12px rgba(74, 222, 128, 0.5),
+    0 0 20px rgba(34, 197, 94, 0.6);
+}
+
+.custom-btn-primary:hover {
+  background-color: #15803d;
+  box-shadow:
+    0 0 18px rgba(132, 225, 188, 0.6),
+    0 0 28px rgba(16, 185, 129, 0.6);
+}
+
+.btn-outline-primary {
+  border: 1px solid #22c55e;
+  color: #15803d;
+  background-color: transparent;
+  font-weight: bold;
+  transition: all 0.2s ease;
+}
+
+.btn-outline-primary:hover {
+  background-color: #22c55e;
+  color: white;
+}
+
+/* Status text */
+.custom-text-success {
+  color: #10c352;
+  font-weight: bold;
+  font-size: 0.85rem;
+}
+
+.custom-text-warning {
+  color: #fde68a;
+  font-weight: bold;
+  font-size: 0.85rem;
+  text-shadow:
+    -1px -1px 0 #000,
+     1px -1px 0 #000,
+    -1px  1px 0 #000,
+     1px  1px 0 #000;
+}

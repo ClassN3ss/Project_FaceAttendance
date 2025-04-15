@@ -1,0 +1,58 @@
+h2, h4{
+    margin-bottom: 2rem;
+}
+
+.teacher-container {
+  max-width: 880px;
+  margin: auto;
+  padding: 100px 2rem 2rem;
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.teacher-container h2 {
+  color: #bbf7d0;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+}
+
+.teacher-container h4 {
+  color: #86efac;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+/* รายการ list group */
+.list-group-item {
+  background-color: #f0fdf4;
+  border: 1px solid #d1fae5;
+  border-radius: 16px;
+  margin-bottom: 0.75rem;
+  padding: 1rem;
+  transition: all 0.2s ease;
+}
+
+.list-group-item:hover {
+  background-color: #bbf7d0;
+  transform: scale(1.01);
+}
+
+/* ปุ่มดูรายละเอียด */
+.btn-outline-secondary.btn-sm {
+  background-color: #22c55e;
+  color: white;
+  border: none;
+  font-weight: bold;
+  padding: 6px 16px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  box-shadow:
+    0 0 12px rgba(74, 222, 128, 0.5),
+    0 0 20px rgba(34, 197, 94, 0.6);
+}
+
+.btn-outline-secondary.btn-sm:hover {
+  background-color: #15803d;
+  box-shadow:
+    0 0 18px rgba(132, 225, 188, 0.6),
+    0 0 28px rgba(16, 185, 129, 0.6);
+}
