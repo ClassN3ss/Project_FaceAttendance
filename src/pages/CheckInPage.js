@@ -38,9 +38,9 @@ const CheckInPage = () => {
         const res = await API.get(`/attendance/history/${user.studentId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        const filtered = res.data.history.filter(
-          (rec) => rec.classId?._id === classId
-        );
+        const filtered = res.data.history
+          .filter((rec) => rec.classId?._id === classId)
+          .sort((a, b) => new Date(b.scan_time) - new Date(a.scan_time));
         setHistory(filtered);
       } catch (err) {
         console.error("❌ โหลดประวัติไม่สำเร็จ:", err);

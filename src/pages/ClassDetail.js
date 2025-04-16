@@ -104,16 +104,26 @@ const ClassDetail = () => {
     if (!classInfo.openAt || !classInfo.closeAt) {
       return alert("⏰ กรุณาระบุเวลาให้ครบก่อน");
     }
-
+  
     if (classInfo.withTeacherFace && !user.faceScanned) {
       setShowFaceModal(true);
       return;
     }
-
+  
     try {
+      // ⛔ ตรวจสอบว่ามี session ที่ยังเปิดอยู่ในห้องนี้อยู่หรือไม่
+      const check = await API.get(`/checkin-sessions/class/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+  
+      const stillOpen = check.data?.status === "active" && new Date(check.data.closeAt) > new Date();
+      if (stillOpen) {
+        return alert("❌ ยังมี session เปิดอยู่ กรุณาปิดหรือรอหมดเวลาก่อน");
+      }
+  
       let latitude = classInfo.latitude;
       let longitude = classInfo.longitude;
-
+  
       if (!classInfo.withMapPreview) {
         const pos = await new Promise((resolve, reject) => {
           navigator.geolocation.getCurrentPosition(resolve, reject, {
@@ -125,12 +135,12 @@ const ClassDetail = () => {
         latitude = pos.coords.latitude;
         longitude = pos.coords.longitude;
       }
-
+  
       if (!latitude || !longitude) {
         alert("❌ ไม่สามารถดึงพิกัดได้ กรุณาเปิด GPS แล้วลองใหม่");
         return;
       }
-
+  
       const response = await API.post(
         "/checkin-sessions/open",
         {
@@ -147,20 +157,20 @@ const ClassDetail = () => {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
+  
       if (response.data.session) {
         setActiveSession(response.data.session);
       } else {
         await fetchActiveSession(); // fallback
       }
-
+  
       setShowSuccessModal(true);
       fetchClassDetail();
     } catch (err) {
       console.error("❌ เปิด session ล้มเหลว:", err);
       alert("❌ เปิดไม่สำเร็จ หรือไม่ได้เปิดใช้งาน GPS");
     }
-  };
+  };  
 
   const handleCloseSession = async () => {
     if (!activeSession?._id) return;

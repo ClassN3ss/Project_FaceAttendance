@@ -32,7 +32,7 @@ const AttendanceHistory = () => {
         const history = historyRes.data.history || [];
         const enrolls = enrollsRes.data.enrolled || [];
 
-        setHistory(history);
+        setHistory(history.sort((a, b) => new Date(b.scan_time) - new Date(a.scan_time)));
 
         const options = enrolls
           .filter(e => e.courseCode && e.courseName && e.section)

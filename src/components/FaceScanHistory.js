@@ -9,7 +9,14 @@ export default function FaceScanHistory() {
 
   useEffect(() => {
     API.get('/attendance/history-student')
-      .then(res => setHistory(res.data))
+      .then(res => {
+        const sorted = [...res.data].sort((a, b) => {
+          const aDate = new Date(`${a.date}T${a.time}`);
+          const bDate = new Date(`${b.date}T${b.time}`);
+          return bDate - aDate; // เรียงใหม่: ล่าสุด → เก่าสุด
+        });
+        setHistory(sorted);
+      })
       .catch(err => console.error("❌ โหลด log ไม่สำเร็จ:", err));
   }, []);
 
@@ -32,7 +39,12 @@ export default function FaceScanHistory() {
           {currentPageItems.map((h, idx) => (
             <tr key={idx}>
               <td>{h.userId?.fullName || '-'}</td>
-              <td>{h.date} {h.time}</td>
+              <td>{new Date(`${h.date}T${h.time}Z`).toLocaleString("th-TH", {
+                    timeZone: "Asia/Bangkok",
+                    dateStyle: "short",
+                    timeStyle: "medium",
+                  })}
+              </td>
               <td>{h.location?.lat}, {h.location?.lng}</td>
               <td>{h.classId?.courseName || '-'}</td>
             </tr>

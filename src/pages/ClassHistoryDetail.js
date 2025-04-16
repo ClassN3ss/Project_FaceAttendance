@@ -26,8 +26,9 @@ const ClassHistoryDetail = () => {
         });
 
         const data = Array.isArray(res.data) ? res.data : [];
-        setAttendances(data);
-        setFiltered(data);
+        const sorted = data.sort((a, b) => new Date(b.scan_time) - new Date(a.scan_time));
+        setAttendances(sorted);
+        setFiltered(sorted);
       } catch (err) {
         console.error("❌ โหลดข้อมูลล้มเหลว:", err);
         setAttendances([]);
