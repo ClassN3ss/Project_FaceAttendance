@@ -114,7 +114,7 @@ const VerifyfaceTeacher = () => {
       if (!student) throw new Error("❌ ไม่พบข้อมูลนักศึกษาที่สแกนไว้");
 
       await API.post(
-        "/api/attendance/checkin",
+        "/attendance/checkin",
         {
           studentId: student.studentId,
           fullName: student.fullName,

@@ -110,7 +110,7 @@ const Scanface = () => {
 
   const handleNormalCheckin = async (payload, token) => {
     try{
-      const res = await API.post("/api/attendance/checkin", payload, {
+      const res = await API.post("/attendance/checkin", payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
