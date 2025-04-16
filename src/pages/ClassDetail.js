@@ -133,7 +133,6 @@ const ClassDetail = () => {
 
       setShowSuccessModal(true);
       fetchClassDetail();
-      fetchActiveSession();
     } catch (err) {
       console.error("❌ เปิด session ล้มเหลว:", err);
       alert("❌ เปิดไม่สำเร็จ หรือไม่ได้เปิดใช้งาน GPS");
@@ -148,7 +147,6 @@ const ClassDetail = () => {
       });
       alert("✅ ปิด session สำเร็จ");
       setActiveSession(null);
-      fetchActiveSession();
     } catch (err) {
       alert("❌ ปิด session ล้มเหลว");
       console.error(err);
@@ -160,7 +158,7 @@ const ClassDetail = () => {
       headers: { Authorization: `Bearer ${token}` }
     });
     setRequests(prev => prev.filter(r => r._id !== reqId));
-    fetchRequests();
+    window.location.reload();
   };
 
   const handleReject = async (reqId) => {
@@ -168,7 +166,7 @@ const ClassDetail = () => {
       headers: { Authorization: `Bearer ${token}` }
     });
     setRequests(prev => prev.filter(r => r._id !== reqId));
-    fetchRequests();
+    window.location.reload();
   };
 
   if (loading) return <div className="container mt-4">⏳ กำลังโหลดข้อมูลห้อง...</div>;
