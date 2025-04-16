@@ -197,7 +197,7 @@ const ClassDetail = () => {
       <p><strong>ตอนเรียน:</strong> {classInfo.section}</p>
       <p><strong>อาจารย์:</strong> {classInfo.teacherId?.fullName}</p>
 
-      {activeSession && (
+      {activeSession ? (
         <>
           <hr />
           <h5>🕐 Session ล่าสุดที่กำลังเปิด</h5>
@@ -218,6 +218,11 @@ const ClassDetail = () => {
               </tr>
             </tbody>
           </table>
+        </>
+      ) : (
+        <>
+          <hr />
+          <h5 className="text-muted">🛑 ขณะนี้ไม่มี session ที่เปิดอยู่</h5>
         </>
       )}
 
