@@ -253,6 +253,7 @@ const ClassDetail = () => {
           <div className="col-md-3">
             <button className="btn btn-primary w-100" onClick={handleOpenSession}>✅ เปิด</button>
           </div>
+
           {classInfo.withMapPreview && (
             <div className="col-12 mt-3">
               <iframe
