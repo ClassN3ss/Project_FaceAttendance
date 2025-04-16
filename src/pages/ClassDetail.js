@@ -55,12 +55,12 @@ const ClassDetail = () => {
         setActiveSession(res.data);
       } else {
         setActiveSession(null);
-        window.location.reload();
+        setTimeout(() => window.location.reload(), 100);
       }
     } catch (err) {
       console.error("❌ ดึง session ล่าสุดไม่สำเร็จ:", err);
       setActiveSession(null);
-      window.location.reload();
+      setTimeout(() => window.location.reload(), 100);
     }
   }, [id, token]);
 
