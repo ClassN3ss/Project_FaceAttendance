@@ -133,7 +133,7 @@ const ClassDetail = () => {
       );
 
       setShowSuccessModal(true);
-      setActiveSession(res.data);
+      setActiveSession(res.data.session);
       fetchActiveSession();
       fetchClassDetail();
     } catch (err) {
