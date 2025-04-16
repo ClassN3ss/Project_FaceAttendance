@@ -135,6 +135,7 @@ const ClassDetail = () => {
       setShowSuccessModal(true);
       setActiveSession(res.data);
       fetchClassDetail();
+      fetchActiveSession();
     } catch (err) {
       console.error("❌ เปิด session ล้มเหลว:", err);
       alert("❌ เปิดไม่สำเร็จ หรือไม่ได้เปิดใช้งาน GPS");
