@@ -75,7 +75,6 @@ const ClassDetail = () => {
       if (now >= close) {
         setActiveSession(null);
         clearInterval(interval);
-        window.location.reload();
       }
     }, 2000);
     return () => clearInterval(interval);
