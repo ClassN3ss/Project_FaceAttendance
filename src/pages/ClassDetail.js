@@ -69,15 +69,23 @@ const ClassDetail = () => {
 
   useEffect(() => {
     if (!activeSession?.closeAt) return;
-    const interval = setInterval(() => {
+
+    const checkExpiration = () => {
       const now = Date.now();
       const close = Date.parse(activeSession.closeAt);
+      console.log("🔍 Checking session expiration:", {
+        now: new Date(now).toISOString(),
+        closeAt: activeSession.closeAt
+      });
+
       if (now >= close) {
+        console.log("⛔ Session expired on frontend");
         setActiveSession(null);
-        clearInterval(interval);
         window.location.reload();
       }
-    }, 2000);
+    };
+
+    const interval = setInterval(checkExpiration, 2000);
     return () => clearInterval(interval);
   }, [activeSession]);
 
@@ -135,7 +143,11 @@ const ClassDetail = () => {
 
       setShowSuccessModal(true);
       fetchClassDetail();
-      setTimeout(() => fetchActiveSession(), 600); // ✅ delay fetch to ensure backend update
+
+      setTimeout(() => {
+        console.log("🔁 Refetching session after delay");
+        fetchActiveSession();
+      }, 1500);
 
     } catch (err) {
       console.error("❌ เปิด session ล้มเหลว:", err);
