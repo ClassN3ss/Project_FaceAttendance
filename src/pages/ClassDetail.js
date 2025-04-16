@@ -74,10 +74,11 @@ const ClassDetail = () => {
       const close = new Date(activeSession.closeAt);
       if (now >= close) {
         setActiveSession(null);
+        fetchActiveSession();
       }
     }, 2000);
     return () => clearInterval(interval);
-  }, [activeSession]);
+  }, [activeSession, fetchActiveSession]);
 
   const updateField = (field, value) => {
     setClassInfo(prev => ({ ...prev, [field]: value }));
@@ -114,7 +115,7 @@ const ClassDetail = () => {
         return;
       }
 
-      await API.post(
+      const res = await API.post(
         "/checkin-sessions/open",
         {
           classId: id,
