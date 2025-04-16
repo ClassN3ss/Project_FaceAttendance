@@ -50,6 +50,12 @@ const ClassDetail = () => {
       const res = await API.get(`/checkin-sessions/class/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      
+      if (!res.data || !res.data.status) {
+        setActiveSession(null);
+        return;
+      }
+
       if (res.data.status === "active") {
         setActiveSession(res.data);
       } else {
@@ -74,11 +80,12 @@ const ClassDetail = () => {
       const close = new Date(activeSession.closeAt);
       if (now >= close) {
         setActiveSession(null);
-        fetchActiveSession();
+        clearInterval(interval);
+        window.location.reload();
       }
     }, 2000);
     return () => clearInterval(interval);
-  }, [activeSession, fetchActiveSession]);
+  }, [activeSession]);
 
   const updateField = (field, value) => {
     setClassInfo(prev => ({ ...prev, [field]: value }));
@@ -115,7 +122,7 @@ const ClassDetail = () => {
         return;
       }
 
-      const res = await API.post(
+      await API.post(
         "/checkin-sessions/open",
         {
           classId: id,
@@ -133,9 +140,7 @@ const ClassDetail = () => {
       );
 
       setShowSuccessModal(true);
-      setActiveSession(res.data.session);
-      await fetchClassDetail();
-      await fetchActiveSession();
+      fetchClassDetail();
     } catch (err) {
       console.error("❌ เปิด session ล้มเหลว:", err);
       alert("❌ เปิดไม่สำเร็จ หรือไม่ได้เปิดใช้งาน GPS");
@@ -150,6 +155,7 @@ const ClassDetail = () => {
       });
       alert("✅ ปิด session สำเร็จ");
       setActiveSession(null);
+      window.location.reload();
     } catch (err) {
       alert("❌ ปิด session ล้มเหลว");
       console.error(err);
@@ -161,6 +167,7 @@ const ClassDetail = () => {
       headers: { Authorization: `Bearer ${token}` }
     });
     setRequests(prev => prev.filter(r => r._id !== reqId));
+    window.location.reload();
   };
 
   const handleReject = async (reqId) => {
@@ -168,6 +175,7 @@ const ClassDetail = () => {
       headers: { Authorization: `Bearer ${token}` }
     });
     setRequests(prev => prev.filter(r => r._id !== reqId));
+    window.location.reload();
   };
 
   if (loading) return <div className="container mt-4">⏳ กำลังโหลดข้อมูลห้อง...</div>;
