@@ -23,6 +23,12 @@ const ClassDetail = () => {
   const token = sessionStorage.getItem("token");
   const navigate = useNavigate();
 
+  const formatDatetimeLocal = (dateStr) => {
+    const date = new Date(dateStr);
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  };  
+
   const fetchClassDetail = useCallback(async () => {
     try {
       const res = await API.get(`/classes/${id}`);
@@ -243,11 +249,7 @@ const ClassDetail = () => {
             <input
               type="datetime-local"
               className="form-control"
-              value={
-                classInfo.openAt
-                  ? new Date(classInfo.openAt).toISOString().slice(0, 16)
-                  : ""
-              }
+              value={classInfo.openAt ? formatDatetimeLocal(classInfo.openAt) : ""}
               onChange={(e) => {
                 updateField("openAt", e.target.value);
                 e.target.blur();
@@ -258,11 +260,7 @@ const ClassDetail = () => {
             <input
               type="datetime-local"
               className="form-control"
-              value={
-                classInfo.closeAt
-                  ? new Date(classInfo.closeAt).toISOString().slice(0, 16)
-                  : ""
-              }
+              value={classInfo.closeAt ? formatDatetimeLocal(classInfo.closeAt) : ""}
               onChange={(e) => {
                 updateField("closeAt", e.target.value);
                 e.target.blur();
