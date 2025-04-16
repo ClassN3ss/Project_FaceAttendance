@@ -6,6 +6,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { Modal, Button } from "react-bootstrap";
 import "../App.css";
 import "../styles/classdetail.css";
+import { formatThaiDate, formatThaiTime } from "../utils/datetime";
 
 const ClassDetail = () => {
   const { id } = useParams();
@@ -54,10 +55,12 @@ const ClassDetail = () => {
         setActiveSession(res.data);
       } else {
         setActiveSession(null);
+        window.location.reload();
       }
     } catch (err) {
       console.error("❌ ดึง session ล่าสุดไม่สำเร็จ:", err);
       setActiveSession(null);
+      window.location.reload();
     }
   }, [id, token]);
 
@@ -187,9 +190,9 @@ const ClassDetail = () => {
             </thead>
             <tbody>
               <tr>
-                <td>{new Date(activeSession.openAt).toLocaleDateString()}</td>
-                <td>{new Date(activeSession.openAt).toLocaleTimeString()}</td>
-                <td>{new Date(activeSession.closeAt).toLocaleTimeString()}</td>
+                <td>{formatThaiDate(activeSession.openAt)}</td>
+                <td>{formatThaiTime(activeSession.openAt)}</td>
+                <td>{formatThaiTime(activeSession.closeAt)}</td>
                 <td>{activeSession.withTeacherFace ? "ใช่" : "ไม่ใช่"}</td>
                 <td><span className="badge bg-success">{activeSession.status}</span></td>
                 <td>
@@ -230,7 +233,10 @@ const ClassDetail = () => {
                   ? new Date(classInfo.openAt).toISOString().slice(0, 16)
                   : ""
               }
-              onChange={(e) => updateField("openAt", e.target.value)}
+              onChange={(e) => {
+                updateField("openAt", e.target.value);
+                e.target.blur();
+              }}
             />
           </div>
           <div className="col-md-3">
@@ -242,7 +248,10 @@ const ClassDetail = () => {
                   ? new Date(classInfo.closeAt).toISOString().slice(0, 16)
                   : ""
               }
-              onChange={(e) => updateField("closeAt", e.target.value)}
+              onChange={(e) => {
+                updateField("closeAt", e.target.value);
+                e.target.blur();
+              }}
             />
           </div>
           <div className="col-md-3">

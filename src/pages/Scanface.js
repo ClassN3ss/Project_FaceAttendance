@@ -200,6 +200,7 @@ const Scanface = () => {
       if (!findRes.ok) throw new Error(findData.message || "❌ ไม่พบใบหน้าในระบบ");
 
       const payload = {
+        studentId: findData.studentId,
         fullName: findData.fullName,
         latitude,
         longitude,
