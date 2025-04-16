@@ -25,7 +25,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:5000/auth/login", {
+      const res = await axios.post("https://backendfaceattendance-production.up.railway.app/auth/login", {
         username,
         password,
       });

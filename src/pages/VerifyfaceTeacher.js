@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import * as faceapi from "face-api.js";
+import API from "../services/api";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../App.css";
 import "../styles/verifyfaceTeacher.css";
@@ -97,7 +98,7 @@ const VerifyfaceTeacher = () => {
 
       const { latitude, longitude } = await getGPSLocation();
 
-      const verifyRes = await fetch("http://localhost:5000/auth/verify-teacher-face", {
+      const verifyRes = await fetch("https://backendfaceattendance-production.up.railway.app/auth/verify-teacher-face", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -112,24 +113,20 @@ const VerifyfaceTeacher = () => {
       const student = JSON.parse(sessionStorage.getItem("studentDescriptor"));
       if (!student) throw new Error("❌ ไม่พบข้อมูลนักศึกษาที่สแกนไว้");
 
-      const checkinRes = await fetch("http://localhost:5000/api/attendance/checkin", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
+      await API.post(
+        "/api/attendance/checkin",
+        {
           studentId: student.studentId,
           fullName: student.fullName,
           latitude,
           longitude,
           sessionId: student.sessionId,
           method: "face-teacher",
-        }),
-      });
-
-      const checkinData = await checkinRes.json();
-      if (!checkinRes.ok) throw new Error(checkinData.message || "❌ เช็คชื่อไม่สำเร็จ");
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       alert(`✅ เช็คชื่อสำเร็จ! ขอบคุณ ${student.fullName}`);
       stopCamera();
@@ -137,7 +134,7 @@ const VerifyfaceTeacher = () => {
       navigate("/student-dashboard");
     } catch (err) {
       console.error("❌ ยืนยันใบหน้าไม่สำเร็จ:", err);
-      setMessage(err.message || "❌ ตรวจสอบใบหน้าไม่สำเร็จ");
+      setMessage(err?.response?.data?.message || err.message || "❌ ตรวจสอบใบหน้าไม่สำเร็จ");
     } finally {
       setLoading(false);
     }

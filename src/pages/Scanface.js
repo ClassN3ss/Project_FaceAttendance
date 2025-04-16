@@ -109,21 +109,18 @@ const Scanface = () => {
   // };
 
   const handleNormalCheckin = async (payload, token) => {
-    const res = await fetch("http://localhost:5000/api/attendance/checkin", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(payload),
-    });
+    try{
+      const res = await API.post("/api/attendance/checkin", payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    const result = await res.json();
-    if (!res.ok) throw new Error(result.message || "❌ เช็คชื่อไม่สำเร็จ");
-
-    alert(`✅ เช็คชื่อสำเร็จ! ขอบคุณ ${payload.fullName}`);
-    stopCamera();
-    navigate("/student-dashboard");
+      alert(`✅ เช็คชื่อสำเร็จ! ขอบคุณ ${payload.fullName}`);
+      stopCamera();
+      navigate("/student-dashboard");
+    }catch (err) {
+      const msg = err.response?.data?.message || "❌ เช็คชื่อไม่สำเร็จ";
+      alert(msg);
+    }
   };
 
   const redirectToTeacherScan = (payload) => {
@@ -178,7 +175,7 @@ const Scanface = () => {
         }
       }                  
 
-      const findRes = await fetch("http://localhost:5000/auth/upload-face", {
+      const findRes = await fetch("https://backendfaceattendance-production.up.railway.app/auth/upload-face", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
