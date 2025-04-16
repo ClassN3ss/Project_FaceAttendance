@@ -51,18 +51,12 @@ const ClassDetail = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log("🟢 API response:", res.data.session);
+      console.log("🟢 API response:", res.data);
 
-      if (!res.data || !res.data.status) {
-        console.log("📭 ไม่มี session ที่เปิดอยู่");
+      if (!res.data || !res.data._id || res.data.status !== "active") {
         setActiveSession(null);
-        return;
-      }
-
-      if (res.data.status === "active") {
+      }else{
         setActiveSession(res.data);
-      } else {
-        setActiveSession(null);
       }
     } catch (err) {
       console.error("❌ ดึง session ล่าสุดไม่สำเร็จ:", err);
@@ -144,6 +138,7 @@ const ClassDetail = () => {
 
       setShowSuccessModal(true);
       fetchClassDetail();
+      fetchActiveSession();
     } catch (err) {
       console.error("❌ เปิด session ล้มเหลว:", err);
       alert("❌ เปิดไม่สำเร็จ หรือไม่ได้เปิดใช้งาน GPS");
@@ -327,7 +322,6 @@ const ClassDetail = () => {
 
       <Modal show={showSuccessModal} onHide={() => {
         setShowSuccessModal(false);
-        window.location.reload();
       }} centered>
         <Modal.Header closeButton>
           <Modal.Title>✅ เปิด Session สำเร็จ</Modal.Title>
@@ -336,7 +330,6 @@ const ClassDetail = () => {
         <Modal.Footer>
           <Button variant="success" onClick={() => {
             setShowSuccessModal(false);
-            window.location.reload();
           }}>
             ตกลง
           </Button>
