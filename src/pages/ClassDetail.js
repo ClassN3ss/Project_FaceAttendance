@@ -50,7 +50,7 @@ const ClassDetail = () => {
       const res = await API.get(`/checkin-sessions/class/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (res.data.status === "active") {
+      if (res.data && res.data.status === "active") {
         setActiveSession(res.data);
       } else {
         setActiveSession(null);
@@ -70,8 +70,8 @@ const ClassDetail = () => {
   useEffect(() => {
     if (!activeSession?.closeAt) return;
     const interval = setInterval(() => {
-      const now = new Date();
-      const close = new Date(activeSession.closeAt);
+      const now = Date.now();
+      const close = Date.parse(activeSession.closeAt);
       if (now >= close) {
         setActiveSession(null);
         clearInterval(interval);
@@ -135,6 +135,8 @@ const ClassDetail = () => {
 
       setShowSuccessModal(true);
       fetchClassDetail();
+      setTimeout(() => fetchActiveSession(), 600); // ✅ delay fetch to ensure backend update
+
     } catch (err) {
       console.error("❌ เปิด session ล้มเหลว:", err);
       alert("❌ เปิดไม่สำเร็จ หรือไม่ได้เปิดใช้งาน GPS");
