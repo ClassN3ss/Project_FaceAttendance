@@ -94,7 +94,7 @@ const SavefaceTeacher = () => {
     }
 
     try {
-      const res = await fetch("https://backendfaceattendance-production.up.railway.app/auth/save-teacher-face", {
+      const res = await fetch("https://merge1.onrender.com/auth/save-teacher-face", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -25,7 +25,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post("https://backendfaceattendance-production.up.railway.app/auth/login", {
+      const res = await axios.post("https://merge1.onrender.com/auth/login", {
         username,
         password,
       });
