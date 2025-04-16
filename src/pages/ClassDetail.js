@@ -51,9 +51,10 @@ const ClassDetail = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log("🟢 API response:", res.data);
+      console.log("🟢 API response:", res.data.session);
 
       if (!res.data || !res.data.status) {
+        console.log("📭 ไม่มี session ที่เปิดอยู่");
         setActiveSession(null);
         return;
       }
