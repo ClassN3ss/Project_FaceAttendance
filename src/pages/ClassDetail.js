@@ -73,8 +73,8 @@ const ClassDetail = () => {
   useEffect(() => {
     if (!activeSession?.closeAt) return;
     const interval = setInterval(() => {
-      const now = new Date();
-      const close = new Date(activeSession.closeAt);
+      const now = new Date.now();
+      const close = new Date.parse(activeSession.closeAt);
       if (now >= close) {
         setActiveSession(null);
         clearInterval(interval);
