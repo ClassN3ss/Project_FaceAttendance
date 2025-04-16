@@ -44,7 +44,7 @@ const NewRegister = () => {
 
     setLoading(true);
     try {
-      const res = await axios.post("https://backendfaceattendance-production.up.railway.app/auth/new-register", {
+      const res = await axios.post("https://backend-faceattendance.onrender.com/auth/new-register", {
         studentId,
         fullName,
         email,
