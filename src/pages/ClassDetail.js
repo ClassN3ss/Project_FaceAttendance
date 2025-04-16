@@ -50,16 +50,20 @@ const ClassDetail = () => {
       const res = await API.get(`/checkin-sessions/class/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      if (res.data && res.data.status === "active") {
-        setActiveSession(res.data);
-      } else {
+  
+      console.log("📡 session fetched:", res.data);
+  
+      if (res.status === 204 || !res.data || res.data.status !== "active") {
         setActiveSession(null);
+        return;
       }
+  
+      setActiveSession(res.data);
     } catch (err) {
       console.error("❌ ดึง session ล่าสุดไม่สำเร็จ:", err);
       setActiveSession(null);
     }
-  }, [id, token]);
+  }, [id, token]);  
 
   useEffect(() => {
     fetchClassDetail();
@@ -81,7 +85,6 @@ const ClassDetail = () => {
       if (now >= close) {
         console.log("⛔ Session expired on frontend");
         setActiveSession(null);
-        window.location.reload();
       }
     };
 
@@ -97,16 +100,16 @@ const ClassDetail = () => {
     if (!classInfo.openAt || !classInfo.closeAt) {
       return alert("⏰ กรุณาระบุเวลาให้ครบก่อน");
     }
-
+  
     if (classInfo.withTeacherFace && !user.faceScanned) {
       setShowFaceModal(true);
       return;
     }
-
+  
     try {
       let latitude = classInfo.latitude;
       let longitude = classInfo.longitude;
-
+  
       if (!classInfo.withMapPreview) {
         const pos = await new Promise((resolve, reject) => {
           navigator.geolocation.getCurrentPosition(resolve, reject, {
@@ -118,12 +121,12 @@ const ClassDetail = () => {
         latitude = pos.coords.latitude;
         longitude = pos.coords.longitude;
       }
-
+  
       if (!latitude || !longitude) {
         alert("❌ ไม่สามารถดึงพิกัดได้ กรุณาเปิด GPS แล้วลองใหม่");
         return;
       }
-
+  
       await API.post(
         "/checkin-sessions/open",
         {
@@ -140,20 +143,36 @@ const ClassDetail = () => {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      setShowSuccessModal(true);
+  
+      // ✅ รอ fetch ซ้ำหลายรอบเพื่อให้ session แสดงผลทัน
+      let retries = 5;
+      let found = false;
+      while (retries-- > 0) {
+        const res = await API.get(`/checkin-sessions/class/${id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+  
+        if (res.data && res.data.status === "active") {
+          setActiveSession(res.data);
+          found = true;
+          break;
+        }
+        await new Promise(r => setTimeout(r, 1000));
+      }
+  
       fetchClassDetail();
-
-      setTimeout(() => {
-        console.log("🔁 Refetching session after delay");
-        fetchActiveSession();
-      }, 1500);
-
+  
+      if (found) {
+        setShowSuccessModal(true);
+      } else {
+        alert("⚠️ Session ถูกเปิดแล้ว แต่โหลดข้อมูล session ไม่ทัน กรุณารีเฟรชหน้าด้วยตนเอง");
+      }
+  
     } catch (err) {
       console.error("❌ เปิด session ล้มเหลว:", err);
       alert("❌ เปิดไม่สำเร็จ หรือไม่ได้เปิดใช้งาน GPS");
     }
-  };
+  };  
 
   const handleCloseSession = async () => {
     if (!activeSession?._id) return;
