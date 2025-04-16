@@ -78,7 +78,6 @@ const ClassDetail = () => {
       if (now >= close) {
         setActiveSession(null);
         clearInterval(interval);
-        window.location.reload();
       }
     }, 2000);
     return () => clearInterval(interval);
@@ -322,6 +321,7 @@ const ClassDetail = () => {
 
       <Modal show={showSuccessModal} onHide={() => {
         setShowSuccessModal(false);
+        window.location.reload();
       }} centered>
         <Modal.Header closeButton>
           <Modal.Title>✅ เปิด Session สำเร็จ</Modal.Title>
@@ -330,6 +330,7 @@ const ClassDetail = () => {
         <Modal.Footer>
           <Button variant="success" onClick={() => {
             setShowSuccessModal(false);
+            window.location.reload();
           }}>
             ตกลง
           </Button>
