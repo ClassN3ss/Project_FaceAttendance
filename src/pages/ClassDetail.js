@@ -74,7 +74,6 @@ const ClassDetail = () => {
       const close = new Date(activeSession.closeAt);
       if (now >= close) {
         setActiveSession(null);
-        clearInterval(interval);
       }
     }, 2000);
     return () => clearInterval(interval);
@@ -134,6 +133,7 @@ const ClassDetail = () => {
 
       setShowSuccessModal(true);
       fetchClassDetail();
+      fetchActiveSession();
     } catch (err) {
       console.error("❌ เปิด session ล้มเหลว:", err);
       alert("❌ เปิดไม่สำเร็จ หรือไม่ได้เปิดใช้งาน GPS");
@@ -148,7 +148,7 @@ const ClassDetail = () => {
       });
       alert("✅ ปิด session สำเร็จ");
       setActiveSession(null);
-      window.location.reload();
+      fetchActiveSession();
     } catch (err) {
       alert("❌ ปิด session ล้มเหลว");
       console.error(err);
@@ -160,7 +160,7 @@ const ClassDetail = () => {
       headers: { Authorization: `Bearer ${token}` }
     });
     setRequests(prev => prev.filter(r => r._id !== reqId));
-    window.location.reload();
+    fetchRequests();
   };
 
   const handleReject = async (reqId) => {
@@ -168,7 +168,7 @@ const ClassDetail = () => {
       headers: { Authorization: `Bearer ${token}` }
     });
     setRequests(prev => prev.filter(r => r._id !== reqId));
-    window.location.reload();
+    fetchRequests();
   };
 
   if (loading) return <div className="container mt-4">⏳ กำลังโหลดข้อมูลห้อง...</div>;
