@@ -132,6 +132,7 @@ const ClassDetail = () => {
       );
 
       setShowSuccessModal(true);
+      setActiveSession(res.data);
       fetchClassDetail();
     } catch (err) {
       console.error("❌ เปิด session ล้มเหลว:", err);
@@ -158,7 +159,6 @@ const ClassDetail = () => {
       headers: { Authorization: `Bearer ${token}` }
     });
     setRequests(prev => prev.filter(r => r._id !== reqId));
-    window.location.reload();
   };
 
   const handleReject = async (reqId) => {
@@ -166,7 +166,6 @@ const ClassDetail = () => {
       headers: { Authorization: `Bearer ${token}` }
     });
     setRequests(prev => prev.filter(r => r._id !== reqId));
-    window.location.reload();
   };
 
   if (loading) return <div className="container mt-4">⏳ กำลังโหลดข้อมูลห้อง...</div>;
