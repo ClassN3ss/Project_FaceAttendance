@@ -175,7 +175,7 @@ const Scanface = () => {
         }
       }                  
 
-      const findRes = await fetch("https://backend-faceattendance.onrender.com/auth/upload-face", {
+      const findRes = await fetch("https://backendfaceattendance-production.up.railway.app/auth/upload-face", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -98,7 +98,7 @@ const VerifyfaceTeacher = () => {
 
       const { latitude, longitude } = await getGPSLocation();
 
-      const verifyRes = await fetch("https://backend-faceattendance.onrender.com/auth/verify-teacher-face", {
+      const verifyRes = await fetch("https://backendfaceattendance-production.up.railway.app/auth/verify-teacher-face", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

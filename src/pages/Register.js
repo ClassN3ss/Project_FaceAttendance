@@ -38,7 +38,7 @@ const Register = () => {
     }
 
     try {
-      const res = await axios.post("https://backend-faceattendance.onrender.com/auth/register", {
+      const res = await axios.post("https://backendfaceattendance-production.up.railway.app/auth/register", {
         studentId,
         fullName,
       });
