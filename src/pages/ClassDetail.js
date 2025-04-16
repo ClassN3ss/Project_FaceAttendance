@@ -68,7 +68,12 @@ const ClassDetail = () => {
   }, [fetchClassDetail, fetchRequests, fetchActiveSession]);
 
   const updateField = (field, value) => {
-    setClassInfo(prev => ({ ...prev, [field]: value }));
+    if (["openAt", "closeAt"].includes(field)) {
+      const utc = new Date(value).toISOString(); // แปลง local → UTC
+      setClassInfo((prev) => ({ ...prev, [field]: utc }));
+    } else {
+      setClassInfo((prev) => ({ ...prev, [field]: value }));
+    }
   };
 
   const handleOpenSession = async () => {
@@ -220,7 +225,11 @@ const ClassDetail = () => {
             <input
               type="datetime-local"
               className="form-control"
-              value={classInfo.openAt || ""}
+              value={
+                classInfo.openAt
+                  ? new Date(classInfo.openAt).toISOString().slice(0, 16)
+                  : ""
+              }
               onChange={(e) => updateField("openAt", e.target.value)}
             />
           </div>
@@ -228,7 +237,11 @@ const ClassDetail = () => {
             <input
               type="datetime-local"
               className="form-control"
-              value={classInfo.closeAt || ""}
+              value={
+                classInfo.closeAt
+                  ? new Date(classInfo.closeAt).toISOString().slice(0, 16)
+                  : ""
+              }
               onChange={(e) => updateField("closeAt", e.target.value)}
             />
           </div>
