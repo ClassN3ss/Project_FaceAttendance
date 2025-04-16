@@ -15,11 +15,11 @@ const Scanface = () => {
   const [message, setMessage] = useState("🔍 โปรดหันหน้าตรง แล้วกด 'เริ่มสแกนใบหน้า'");
   const [loading, setLoading] = useState(false);
   const [videoReady, setVideoReady] = useState(false);
-  
+
   const stopCamera = () => {
     const stream = videoRef.current?.srcObject;
     if (stream) {
-      stream.getTracks().forEach(track => track.stop());
+      stream.getTracks().forEach((track) => track.stop());
       videoRef.current.srcObject = null;
     }
   };
@@ -30,7 +30,7 @@ const Scanface = () => {
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
         videoRef.current.onloadedmetadata = () => {
-          videoRef.current.play().catch(err => console.warn("play() interrupted", err));
+          videoRef.current.play().catch((err) => console.warn("play() interrupted", err));
         };
       }
     } catch {
@@ -59,6 +59,9 @@ const Scanface = () => {
       const res = await API.get(`/checkin-sessions/class/${classId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
+      console.log("🕒 [Client Now]:", new Date().toISOString());
+      console.log("📦 [Session Time]:", res.data?.openAt, res.data?.closeAt);
       setSession(res.data);
     } catch {
       setMessage("❌ ขณะนี้ยังไม่มี session เปิดอยู่ กรุณารออาจารย์");
@@ -74,10 +77,11 @@ const Scanface = () => {
   const getGPSLocation = () =>
     new Promise((resolve, reject) => {
       navigator.geolocation.getCurrentPosition(
-        (pos) => resolve({
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
-        }),
+        (pos) =>
+          resolve({
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+          }),
         () => reject(new Error("❌ เข้าถึง GPS ไม่สำเร็จ")),
         {
           enableHighAccuracy: true,
@@ -89,27 +93,30 @@ const Scanface = () => {
 
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
     const R = 6371e3;
-    const toRad = (v) => v * Math.PI / 180;
+    const toRad = (v) => (v * Math.PI) / 180;
     const dLat = toRad(lat2 - lat1);
     const dLon = toRad(lon2 - lon1);
-    const a = Math.sin(dLat / 2) ** 2 +
-              Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
-              Math.sin(dLon / 2) ** 2;
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
     return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   };
 
-  // const reverseGeocode = async (lat, lon) => {
-  //   try {
-  //     const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
-  //     const data = await res.json();
-  //     return data.display_name || "ตำแหน่งที่ไม่รู้จัก";
-  //   } catch {
-  //     return "ตำแหน่งที่ไม่รู้จัก";
-  //   }
-  // };
+  const reverseGeocode = async (lat, lon) => {
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
+      );
+      const data = await res.json();
+      return data.display_name || "ตำแหน่งที่ไม่รู้จัก";
+    } catch {
+      return "ตำแหน่งที่ไม่รู้จัก";
+    }
+  };
 
   const handleNormalCheckin = async (payload, token) => {
-    try{
+    try {
+      console.log("📤 ส่งเช็คชื่อ payload:", payload);
       const res = await API.post("/attendance/checkin", payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -117,7 +124,7 @@ const Scanface = () => {
       alert(`✅ เช็คชื่อสำเร็จ! ขอบคุณ ${payload.fullName}`);
       stopCamera();
       navigate("/student-dashboard");
-    }catch (err) {
+    } catch (err) {
       const msg = err.response?.data?.message || "❌ เช็คชื่อไม่สำเร็จ";
       alert(msg);
     }
@@ -151,7 +158,6 @@ const Scanface = () => {
 
       const descriptorArray = Array.from(detections[0].descriptor);
       const token = sessionStorage.getItem("token");
-
       const { latitude, longitude } = await getGPSLocation();
 
       if (session?.location?.latitude && session?.location?.longitude) {
@@ -164,25 +170,31 @@ const Scanface = () => {
           longitude
         );
         console.log("📏 คำนวณระยะห่าง:", distance.toFixed(2), "เมตร");
-      
+
         if (distance > 100) {
-          // const place = await reverseGeocode(latitude, longitude);
-          setMessage(`❌ คุณอยู่นอกพื้นที่เช็คชื่อ (ห่าง ${Math.round(distance)} เมตร)\n 
-          + พิกัดของคุณ: ${latitude.toFixed(6)}, ${longitude.toFixed(6)} ` 
-          + (session.location.name ? `\n📌 จุดหมายเช็คชื่อ: ${session.location.name}` : ""));
+          const place = await reverseGeocode(latitude, longitude);
+          setMessage(
+            `❌ คุณอยู่นอกพื้นที่เช็คชื่อ (ห่าง ${Math.round(distance)} เมตร)\n` +
+              `📍 พิกัดของคุณ: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}\n` +
+              `🗺️ สถานที่: ${place}` +
+              (session.location.name ? `\n📌 จุดหมายเช็คชื่อ: ${session.location.name}` : "")
+          );
           setLoading(false);
           return;
         }
-      }                  
+      }
 
-      const findRes = await fetch("https://backendfaceattendance-production.up.railway.app/auth/upload-face", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ faceDescriptor: descriptorArray }),
-      });
+      const findRes = await fetch(
+        "https://backendfaceattendance-production.up.railway.app/auth/upload-face",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ faceDescriptor: descriptorArray }),
+        }
+      );
 
       const findData = await findRes.json();
       if (!findRes.ok) throw new Error(findData.message || "❌ ไม่พบใบหน้าในระบบ");
@@ -227,10 +239,13 @@ const Scanface = () => {
         <button className="btn btn-success" onClick={scanFace} disabled={loading}>
           {loading ? "กำลังตรวจสอบ..." : "✅ เริ่มสแกนใบหน้า"}
         </button>
-        <button className="btn btn-secondary" onClick={() => {
-          stopCamera();
-          navigate(-1);
-        }}>
+        <button
+          className="btn btn-secondary"
+          onClick={() => {
+            stopCamera();
+            navigate(-1);
+          }}
+        >
           🔙 กลับ
         </button>
       </div>
