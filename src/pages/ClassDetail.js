@@ -180,6 +180,7 @@ const ClassDetail = () => {
       });
       alert("✅ ปิด session สำเร็จ");
       setActiveSession(null);
+      window.location.reload();
     } catch (err) {
       alert("❌ ปิด session ล้มเหลว");
       console.error(err);
@@ -191,6 +192,7 @@ const ClassDetail = () => {
       headers: { Authorization: `Bearer ${token}` },
     });
     setRequests(prev => prev.filter(r => r._id !== reqId));
+    window.location.reload();
   };
 
   const handleReject = async (reqId) => {
@@ -198,6 +200,7 @@ const ClassDetail = () => {
       headers: { Authorization: `Bearer ${token}` },
     });
     setRequests(prev => prev.filter(r => r._id !== reqId));
+    window.location.reload();
   };
 
   if (loading) return <div className="container mt-4">⏳ กำลังโหลดข้อมูลห้อง...</div>;

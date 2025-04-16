@@ -53,7 +53,6 @@ const ClassHistoryList = () => {
         });
 
         let data = Array.isArray(res.data) ? res.data : [];
-        data = data.sort((a, b) => new Date(b.scan_time) - new Date(a.scan_time));
 
         if (selectedDate) {
           const filterDate = new Date(selectedDate).toLocaleDateString("th-TH", {
@@ -71,6 +70,8 @@ const ClassHistoryList = () => {
             return local === filterDate;
           });
         }
+
+        data = data.sort((a, b) => new Date(b.scan_time) - new Date(a.scan_time));
 
         setFiltered(data);
         setCurrentPage(1);
