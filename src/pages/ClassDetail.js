@@ -134,20 +134,22 @@ const ClassDetail = () => {
           openAt: classInfo.openAt,
           closeAt: classInfo.closeAt,
           withTeacherFace: classInfo.withTeacherFace || false,
+          withMapPreview: classInfo.withMapPreview || false,
           location: {
             latitude,
             longitude,
             radiusInMeters: classInfo.radius || 100,
             name: classInfo.locationName || "",
-          }
+          },
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
   
-      // ✅ รอ fetch ซ้ำหลายรอบเพื่อให้ session แสดงผลทัน
+      // ✅ retry fetch session 5 รอบ ทุก 1 วิ
       let retries = 5;
       let found = false;
       while (retries-- > 0) {
+        await new Promise(r => setTimeout(r, 1000));
         const res = await API.get(`/checkin-sessions/class/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -157,22 +159,20 @@ const ClassDetail = () => {
           found = true;
           break;
         }
-        await new Promise(r => setTimeout(r, 1000));
       }
   
       fetchClassDetail();
+      setShowSuccessModal(true);
   
-      if (found) {
-        setShowSuccessModal(true);
-      } else {
-        alert("⚠️ Session ถูกเปิดแล้ว แต่โหลดข้อมูล session ไม่ทัน กรุณารีเฟรชหน้าด้วยตนเอง");
+      if (!found) {
+        alert("⚠️ Session เปิดแล้ว แต่โหลดไม่ทัน กรุณารีเฟรชหน้า");
       }
   
     } catch (err) {
       console.error("❌ เปิด session ล้มเหลว:", err);
       alert("❌ เปิดไม่สำเร็จ หรือไม่ได้เปิดใช้งาน GPS");
     }
-  };  
+  };    
 
   const handleCloseSession = async () => {
     if (!activeSession?._id) return;
