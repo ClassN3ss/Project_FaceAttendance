@@ -50,7 +50,9 @@ const ClassDetail = () => {
       const res = await API.get(`/checkin-sessions/class/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      
+
+      console.log("🟢 API response:", res.data);
+
       if (!res.data || !res.data.status) {
         setActiveSession(null);
         return;
