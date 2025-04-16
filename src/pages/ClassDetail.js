@@ -55,12 +55,10 @@ const ClassDetail = () => {
         setActiveSession(res.data);
       } else {
         setActiveSession(null);
-        setTimeout(() => window.location.reload(), 100);
       }
     } catch (err) {
       console.error("❌ ดึง session ล่าสุดไม่สำเร็จ:", err);
       setActiveSession(null);
-      setTimeout(() => window.location.reload(), 100);
     }
   }, [id, token]);
 
@@ -69,6 +67,23 @@ const ClassDetail = () => {
     fetchRequests();
     fetchActiveSession();
   }, [fetchClassDetail, fetchRequests, fetchActiveSession]);
+
+  useEffect(() => {
+    if (!activeSession?.closeAt) return;
+  
+    const interval = setInterval(() => {
+      const now = new Date();
+      const closeTime = new Date(activeSession.closeAt);
+  
+      if (now >= closeTime) {
+        clearInterval(interval);
+        setActiveSession(null);
+        window.location.reload(); // ✅ รีเฟรชเมื่อหมดเวลา session
+      }
+    }, 2000);
+  
+    return () => clearInterval(interval);
+  }, [activeSession]);  
 
   const updateField = (field, value) => {
     if (["openAt", "closeAt"].includes(field)) {
