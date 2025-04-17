@@ -88,12 +88,26 @@ const StudentDashboard = () => {
     enrolledClassIds.includes(cls._id.toString())
   );
 
-  const notJoinedClasses = allClasses.filter(cls => {
-    const id = cls._id.toString();
-    const isEnrolled = enrolledClassIds.includes(id);
-    const isInList = cls.students?.some(s => (s._id || s).toString() === user._id);
-    return !isEnrolled && isInList;
-  });
+  const notJoinedClasses = [
+    // ห้องที่ user มีรายชื่อในคลาส แต่ยังไม่ enroll
+    ...allClasses.filter(cls => {
+      const id = cls._id.toString();
+      const isEnrolled = enrolledClassIds.includes(id);
+      const isInList = cls.students?.some(s => (s._id || s).toString() === user._id);
+      return !isEnrolled && isInList;
+    }),
+    // ห้องที่ส่งคำร้องไว้แล้วแต่ยังไม่ได้ join จริง
+    ...pendingRequests
+      .map(r => r.classId)
+      .filter(cls => {
+        const id = cls._id.toString();
+        return !enrolledClassIds.includes(id);
+      })
+      // กันไม่ให้ซ้ำกับ allClasses ด้านบน
+      .filter((cls, index, self) =>
+        index === self.findIndex(c => c._id === cls._id)
+      )
+  ];  
 
   const renderClassItem = (cls, showJoinButton = true, showEnterButton = true) => (
     <li key={cls._id} className="list-group-item p-3">
