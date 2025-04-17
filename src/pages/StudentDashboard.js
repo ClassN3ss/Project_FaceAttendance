@@ -115,22 +115,19 @@ const StudentDashboard = () => {
   );
 
   const notJoinedClasses = [
-    ...allClasses.filter(cls => {
+    ...mergedClasses.filter(cls => {
       const id = cls._id.toString();
       const isEnrolled = enrolledClassIds.includes(id);
       const isInList = cls.students?.some(s => (s._id || s).toString() === user._id);
       return !isEnrolled && isInList;
     }),
     ...pendingRequests
-      .map(r => r.classId)
-      .filter(cls => {
-        const id = cls._id.toString();
-        return !enrolledClassIds.includes(id);
-      })
+      .map(r => mergedClasses.find(c => (c._id || "").toString() === (r.classId?._id || r.classId).toString()))
+      .filter(Boolean)
       .filter((cls, index, self) =>
         index === self.findIndex(c => c._id === cls._id)
       )
-  ];  
+  ];    
 
   const renderClassItem = (cls, showJoinButton = true, showEnterButton = true) => (
     <li key={cls._id} className="list-group-item p-3">
