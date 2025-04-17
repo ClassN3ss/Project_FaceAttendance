@@ -14,8 +14,8 @@ const Register = () => {
 
   const navigate = useNavigate();
 
-  const studentIdPattern = /^\d{13}$|^123/;
-  const fullNamePattern = /^(นาย|นางสาว|นาง)[^\s]+ [^\s]+$|^admin/;
+  const studentIdPattern = /^\d{13}$/;
+  const fullNamePattern = /^(นาย|นางสาว|นาง)[^\s]+ [^\s]+$/;
 
   const isStudentIdValid = studentIdPattern.test(studentId.trim());
   const isFullNameValid = fullNamePattern.test(fullName.trim());
