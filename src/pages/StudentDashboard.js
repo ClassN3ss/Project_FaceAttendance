@@ -113,19 +113,28 @@ const StudentDashboard = () => {
     enrolledClassIds.includes(cls._id.toString())
   );
 
+  const notYetApproved = mergedClasses.filter(cls => {
+    const id = cls._id?.toString();
+    const isEnrolled = enrolledClassIds.includes(id);
+    const isInClassList = cls.students?.some(s => (s._id || s)?.toString() === user._id);
+    return !isEnrolled && isInClassList;
+  });
+
+  const requestedButNotInClass = pendingRequests
+    .map(r => {
+      const reqId = r.classId?._id || r.classId;
+      return mergedClasses.find(cls => cls._id?.toString() === reqId?.toString());
+    })
+    .filter(Boolean)
+    .filter(cls => {
+      const isAlreadyIn = cls.students?.some(s => (s._id || s)?.toString() === user._id);
+      return !isAlreadyIn;
+    })
+    .filter((cls, index, self) => index === self.findIndex(c => c._id === cls._id));
+
   const notJoinedClasses = [
-    ...mergedClasses.filter(cls => {
-      const id = cls._id.toString();
-      const isEnrolled = enrolledClassIds.includes(id);
-      const isInList = cls.students?.some(s => (s._id || s).toString() === user._id);
-      return !isEnrolled && isInList;
-    }),
-    ...pendingRequests
-      .map(r => mergedClasses.find(c => (c._id || "").toString() === (r.classId?._id || r.classId).toString()))
-      .filter(Boolean)
-      .filter((cls, index, self) =>
-        index === self.findIndex(c => c._id === cls._id)
-      )
+    ...notYetApproved,
+    ...requestedButNotInClass
   ];
 
   const renderClassItem = (cls, showJoinButton = true, showEnterButton = true) => (
