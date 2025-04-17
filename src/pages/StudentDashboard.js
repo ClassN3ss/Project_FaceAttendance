@@ -10,7 +10,7 @@ const StudentDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const [allClasses, setAllClasses] = useState([]);
+  const [mergedClasses, setMergedClasses] = useState([]);
   const [pendingRequests, setPendingRequests] = useState([]);
   const [enrolledClassIds, setEnrolledClassIds] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -30,6 +30,7 @@ const StudentDashboard = () => {
           API.get(`/enrolls/enrolled/${user._id}`),
           API.get(`/classes/student/${user._id}`)
         ]);
+
         const pending = reqRes.data;
         const enrolled = approvedEnrollRes.data.enrolled || [];
         const allClasses = myClassesRes.data;
@@ -43,23 +44,21 @@ const StudentDashboard = () => {
             try {
               const res = await API.get(`/classes/${id}`);
               const classData = res.data;
-        
-              // ดึงข้อมูลอาจารย์
               if (classData.teacherId && typeof classData.teacherId === "string") {
                 const teacherRes = await API.get(`/users/${classData.teacherId}`);
                 classData.teacherId = teacherRes.data;
               }
-        
               return classData;
             } catch {
               return null;
             }
           })
-        );        
-        const validMissingClasses = fetchedMissingClasses.filter(c => c !== null);
-        const mergedClasses = [...allClasses, ...validMissingClasses];
+        );
 
-        setAllClasses(mergedClasses);
+        const validMissingClasses = fetchedMissingClasses.filter(c => c !== null);
+        const merged = [...allClasses, ...validMissingClasses];
+
+        setMergedClasses(merged);
         setPendingRequests(pending);
         setEnrolledClassIds(
           enrolled
@@ -110,7 +109,7 @@ const StudentDashboard = () => {
       return id === clsId;
     });
 
-  const joinedClasses = allClasses.filter(cls =>
+  const joinedClasses = mergedClasses.filter(cls =>
     enrolledClassIds.includes(cls._id.toString())
   );
 
@@ -127,7 +126,7 @@ const StudentDashboard = () => {
       .filter((cls, index, self) =>
         index === self.findIndex(c => c._id === cls._id)
       )
-  ];    
+  ];
 
   const renderClassItem = (cls, showJoinButton = true, showEnterButton = true) => (
     <li key={cls._id} className="list-group-item p-3">
