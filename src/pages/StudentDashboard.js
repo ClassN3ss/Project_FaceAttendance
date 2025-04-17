@@ -48,7 +48,7 @@ const StudentDashboard = () => {
         const validMissingClasses = fetchedMissingClasses.filter(c => c !== null);
         const mergedClasses = [...allClasses, ...validMissingClasses];
 
-        setAllClasses(allClasses);
+        setAllClasses(mergedClasses);
         setPendingRequests(pending);
         setEnrolledClassIds(
           enrolled
