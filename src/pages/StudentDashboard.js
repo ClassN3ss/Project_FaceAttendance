@@ -39,12 +39,23 @@ const StudentDashboard = () => {
         const missingIds = pendingClassIds.filter(id => !existingClassIds.has(id));
 
         const fetchedMissingClasses = await Promise.all(
-          missingIds.map(id =>
-            API.get(`/classes/${id}`)
-              .then(res => res.data)
-              .catch(() => null)
-          )
-        );
+          missingIds.map(async (id) => {
+            try {
+              const res = await API.get(`/classes/${id}`);
+              const classData = res.data;
+        
+              // ดึงข้อมูลอาจารย์
+              if (classData.teacherId && typeof classData.teacherId === "string") {
+                const teacherRes = await API.get(`/users/${classData.teacherId}`);
+                classData.teacherId = teacherRes.data;
+              }
+        
+              return classData;
+            } catch {
+              return null;
+            }
+          })
+        );        
         const validMissingClasses = fetchedMissingClasses.filter(c => c !== null);
         const mergedClasses = [...allClasses, ...validMissingClasses];
 
