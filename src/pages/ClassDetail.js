@@ -343,7 +343,7 @@ const ClassDetail = () => {
                   className="form-control"
                   placeholder="ระยะอนุญาต (เมตร)"
                   type="number"
-                  value={classInfo.radius || 30}
+                  value={classInfo.radius || 50}
                   onChange={(e) => updateField("radius", parseInt(e.target.value))}
                 />
               </div>
