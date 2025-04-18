@@ -151,7 +151,7 @@ const ClassDetail = () => {
           location: {
             latitude,
             longitude,
-            radiusInMeters: classInfo.radius || 100,
+            radiusInMeters: classInfo.radius || 30,
             name: classInfo.locationName || "",
           },
         },
@@ -314,6 +314,7 @@ const ClassDetail = () => {
                 title="map-preview"
               ></iframe>
               <div className="mt-2">
+                ชื่อสถานที่
                 <input
                   className="form-control mb-2"
                   placeholder="ชื่อสถานที่"
@@ -321,6 +322,7 @@ const ClassDetail = () => {
                   value={classInfo.locationName || ""}
                   onChange={(e) => updateField("locationName", e.target.value)}
                 />
+                ละติจูด
                 <input
                   className="form-control mb-2"
                   placeholder="ละติจูด"
@@ -328,6 +330,7 @@ const ClassDetail = () => {
                   value={classInfo.latitude || ""}
                   onChange={(e) => updateField("latitude", parseFloat(e.target.value))}
                 />
+                ลองจิจูด
                 <input
                   className="form-control mb-2"
                   placeholder="ลองจิจูด"
@@ -335,11 +338,12 @@ const ClassDetail = () => {
                   value={classInfo.longitude || ""}
                   onChange={(e) => updateField("longitude", parseFloat(e.target.value))}
                 />
+                ระยะที่อนุญาต (เมตร)
                 <input
                   className="form-control"
                   placeholder="ระยะอนุญาต (เมตร)"
                   type="number"
-                  value={classInfo.radius || 100}
+                  value={classInfo.radius || 30}
                   onChange={(e) => updateField("radius", parseInt(e.target.value))}
                 />
               </div>
