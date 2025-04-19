@@ -151,7 +151,7 @@ const ClassDetail = () => {
           location: {
             latitude,
             longitude,
-            radiusInMeters: classInfo.radius || 30,
+            radiusInMeters: classInfo.radius || 50,
             name: classInfo.locationName || "",
           },
         },
