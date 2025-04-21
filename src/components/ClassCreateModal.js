@@ -25,69 +25,55 @@ export default function ClassCreateModal({ onCreated }) {
     setPreview({ courseCode: '', courseName: '', teacherName: '', section: '' });
     setEmail('');
     setEmailLocked(false);
-  
+
     if (!selectedFile?.name.endsWith('.xlsx')) {
       alert('กรุณาเลือกเฉพาะไฟล์ .xlsx');
       return;
     }
-  
+
     try {
       const data = await selectedFile.arrayBuffer();
       const workbook = XLSX.read(data);
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
-  
+
       const courseRow = rows.find(r => r?.[0]?.includes('วิชา'));
       const teacherRow = rows.find(r => r?.[5]?.includes('ผู้สอน'));
-  
+
       if (!courseRow || !teacherRow) {
         alert('ไม่พบข้อมูลชื่อวิชา หรือ ผู้สอนในไฟล์');
         return;
       }
-  
+
       const courseParts = courseRow[0].split(/\s+/);
       const courseCode = courseParts[1] || '000000';
-      const fullCourseName = courseParts.slice(2).join(' ') || 'ไม่พบชื่อวิชา';
-  
-      // ✅ แยก section จากคำว่า "ตอน X"
-      const sectionMatch = fullCourseName.match(/ตอน\s*(\d+)/);
-      const section = sectionMatch ? sectionMatch[1] : '1';
-  
-      // ✅ ลบคำว่า "ตอน X" ออกจาก courseName ที่จะแสดง
-      const courseName = fullCourseName.replace(/ตอน\s*\d+/g, '').trim();
-  
+      const courseName = courseParts.slice(2).join(' ') || 'ไม่พบชื่อวิชา';
       const teacherName = cleanName(teacherRow[5]);
-  
+
       const students = [];
-  
       for (let i = 9; i < rows.length; i++) {
         const row = rows[i];
         const studentId = row[1];
         const fullName = row[2];
-  
-        // ✅ ถ้าเจอช่องใดช่องหนึ่งว่าง ให้หยุดทันที
-        if (!studentId || !fullName) {
-          alert(`ข้อมูลไม่ครบในแถวที่ ${i + 1} กรุณาอัปโหลดไฟล์ใหม่`);
-          return;
-        }
-  
         const sectionCell = row[3];
-        students.push({
-          studentId: studentId.toString().trim(),
-          fullName: fullName.toString().trim(),
-          section: sectionCell || section
-        });
+        if (studentId && fullName) {
+          students.push({
+            studentId,
+            fullName,
+            section: sectionCell || '1'
+          });
+        }
       }
-  
+
       if (students.length === 0) {
         alert('ไม่พบนักศึกษาในไฟล์');
         return;
       }
-  
-      setPreview({ courseCode, courseName, teacherName, section });
+
+      setPreview({ courseCode, courseName, teacherName, section: students[0]?.section || '1' });
       setStudentsPreview(students);
       setValid(true);
-  
+
       const emailFromSystem = await getTeacherEmailByName(teacherName);
       if (emailFromSystem && emailFromSystem.trim()) {
         setEmail(emailFromSystem.trim());
@@ -98,7 +84,6 @@ export default function ClassCreateModal({ onCreated }) {
       alert('ไม่สามารถอ่านไฟล์ได้');
     }
   };
-    
 
   const handleEmailChange = (e) => {
     const value = e.target.value.toLowerCase();

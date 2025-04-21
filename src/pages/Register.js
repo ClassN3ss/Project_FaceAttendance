@@ -27,13 +27,13 @@ const Register = () => {
     setError("");
 
     if (!isStudentIdValid) {
-      setError("❗ รหัสนักศึกษาต้องอยู่ในรูปแบบ xx-xxxxxx-xxxx-x");
+      setError("! รหัสนักศึกษาต้องอยู่ในรูปแบบ xx-xxxxxx-xxxx-x");
       setLoading(false);
       return;
     }
 
     if (!isFullNameValid) {
-      setError("❗ ชื่อต้องขึ้นต้นด้วย นาย, นางสาว หรือ นาง และต้องมีชื่อ + นามสกุล ไม่มีเว้นวรรคเกิน");
+      setError("! ชื่อต้องขึ้นต้นด้วย นาย, นางสาว หรือ นาง และต้องมีชื่อ + นามสกุล ไม่มีเว้นวรรคเกิน");
       setLoading(false);
       return;
     }
@@ -45,10 +45,10 @@ const Register = () => {
       });
       setGeneratedCredentials(res.data);
     } catch (error) {
-      const msg = error.response?.data?.message || "❌ ลงทะเบียนไม่สำเร็จ";
+      const msg = error.response?.data?.message || "ลงทะเบียนไม่สำเร็จ";
 
       if (msg.includes("ไม่พบชื่อและรหัส")) {
-        const confirm = window.confirm("❗ ไม่พบชื่อและรหัสของคุณในระบบ ต้องการลงทะเบียนใหม่หรือไม่?");
+        const confirm = window.confirm("! ไม่พบชื่อและรหัสของคุณในระบบ ต้องการลงทะเบียนใหม่หรือไม่?");
         if (confirm) {
           navigate("/new-register", { state: { studentId, fullName } });
         }
@@ -56,7 +56,7 @@ const Register = () => {
       }
 
       if (msg.includes("ข้อมูลบางส่วนไม่ตรง")) {
-        setError("❗ ข้อมูลบางส่วนไม่ตรงกับระบบ กรุณาตรวจสอบให้ครบถ้วน");
+        setError("! ข้อมูลบางส่วนไม่ตรงกับระบบ กรุณาตรวจสอบให้ครบถ้วน");
         return;
       }
 
@@ -72,13 +72,13 @@ const Register = () => {
     const password = generatedCredentials.password.replaceAll("-", "");
     const text = `Username: ${username}\nPassword: ${password}`;
     navigator.clipboard.writeText(text);
-    alert("📋 คัดลอกสำเร็จ!");
+    alert("คัดลอกสำเร็จ!");
   };
 
   return (
     <div className="register-bg">
       <div className="register-card">
-        <h2 className="text-center mb-4">📋 ลงทะเบียนนักศึกษา</h2>
+        <h2 className="text-center mb-4">ลงทะเบียนนักศึกษา</h2>
 
         <form onSubmit={handleRegister}>
           <label className="form-label">Student ID</label>
@@ -118,7 +118,7 @@ const Register = () => {
             className="btn btn-primary w-100 mt-3"
             disabled={loading}
           >
-            {loading ? "⏳ Registering..." : "📝 Register"}
+            {loading ? "Registering..." : "Register"}
           </button>
         </form>
 
@@ -142,13 +142,13 @@ const Register = () => {
               className="btn btn-copy w-100"
               onClick={handleCopy}
             >
-              📋 คัดลอก
+              คัดลอก
             </button>
             <button
               className="btn btn-success w-100 mt-2"
               onClick={() => navigate("/login")}
             >
-              🔐 ไปหน้า Login
+              ไปหน้า Login
             </button>
           </div>
         )}
