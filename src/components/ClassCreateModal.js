@@ -16,7 +16,6 @@ export default function ClassCreateModal({ onCreated }) {
     .replace(/ผู้สอน/g, '')
     .trim();
 
-
   const handleFileSelect = async (e) => {
     const selectedFile = e.target.files[0];
     setFile(selectedFile);
@@ -27,7 +26,7 @@ export default function ClassCreateModal({ onCreated }) {
     setEmailLocked(false);
 
     if (!selectedFile?.name.endsWith('.xlsx')) {
-      alert('กรุณาเลือกเฉพาะไฟล์ .xlsx');
+      alert('❌ กรุณาเลือกเฉพาะไฟล์ .xlsx');
       return;
     }
 
@@ -41,7 +40,7 @@ export default function ClassCreateModal({ onCreated }) {
       const teacherRow = rows.find(r => r?.[5]?.includes('ผู้สอน'));
 
       if (!courseRow || !teacherRow) {
-        alert('ไม่พบข้อมูลชื่อวิชา หรือ ผู้สอนในไฟล์');
+        alert('❌ ไม่พบข้อมูลชื่อวิชา หรือ ผู้สอนในไฟล์');
         return;
       }
 
@@ -66,7 +65,7 @@ export default function ClassCreateModal({ onCreated }) {
       }
 
       if (students.length === 0) {
-        alert('ไม่พบนักศึกษาในไฟล์');
+        alert('❌ ไม่พบนักศึกษาในไฟล์');
         return;
       }
 
@@ -80,8 +79,8 @@ export default function ClassCreateModal({ onCreated }) {
         setEmailLocked(true);
       }
     } catch (err) {
-      console.error('Error reading file:', err);
-      alert('ไม่สามารถอ่านไฟล์ได้');
+      console.error('❌ Error reading file:', err);
+      alert('❌ ไม่สามารถอ่านไฟล์ได้');
     }
   };
 
@@ -94,7 +93,7 @@ export default function ClassCreateModal({ onCreated }) {
   };
 
   const handleCreate = async () => {
-    if (!file || !valid || !email) return alert('กรุณาแนบไฟล์ และกรอกอีเมลอาจารย์');
+    if (!file || !valid || !email) return alert('❌ กรุณาแนบไฟล์ และกรอกอีเมลอาจารย์');
 
     const formData = new FormData();
     formData.append('file', file);
@@ -103,7 +102,7 @@ export default function ClassCreateModal({ onCreated }) {
 
     try {
       await API.post('/classes/create', formData);
-      alert('สร้างคลาสสำเร็จ');
+      alert('✅ สร้างคลาสสำเร็จ');
       setModalOpen(false);
       setFile(null);
       setEmail('');
@@ -113,7 +112,7 @@ export default function ClassCreateModal({ onCreated }) {
       setStudentsPreview([]);
       onCreated();
     } catch (err) {
-      console.error('Error creating class', err);
+      console.error('❌ Error creating class', err);
       alert(err.response?.data?.message || 'เกิดข้อผิดพลาด');
     }
   };
@@ -159,13 +158,13 @@ export default function ClassCreateModal({ onCreated }) {
               <input
                 type="text"
                 className="form-control mb-2"
-                placeholder="ค้นหานักศึกษา..."
+                placeholder="🔍 ค้นหานักศึกษา..."
                 value={filter}
                 onChange={e => setFilter(e.target.value)}
               />
 
               <div className="alert alert-info" style={{ maxHeight: 300, overflowY: 'auto' }}>
-                <strong>รายชื่อนักศึกษา ({filteredStudents.length} คน)</strong>
+                <strong>👨‍🎓 รายชื่อนักศึกษา ({filteredStudents.length} คน)</strong>
                 <ul className="mb-0 small">
                   {filteredStudents.map((s, i) => (
                     <li key={i}>
@@ -182,7 +181,7 @@ export default function ClassCreateModal({ onCreated }) {
             disabled={!file || !valid || !email}
             onClick={handleCreate}
           >
-            สร้างคลาส
+            ✅ สร้างคลาส
           </button>
         </div>
       )}

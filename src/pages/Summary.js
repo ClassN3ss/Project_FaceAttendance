@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import API from '../services/api';
 import "bootstrap/dist/css/bootstrap.min.css";
-import "../styles/studentlist.css";
+import "../styles/summary.css";
 
-const StudentList = () => {
+const Summary = () => {
   const [classList, setClassList] = useState([]);
   const [selectedCourse, setSelectedCourse] = useState("");
   const [selectedSectionId, setSelectedSectionId] = useState("");
@@ -153,4 +153,4 @@ const StudentList = () => {
   );
 };
 
-export default StudentList;
+export default Summary;

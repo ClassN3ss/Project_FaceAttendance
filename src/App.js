@@ -21,7 +21,7 @@ import ClassHistoryList from "./pages/ClassHistoryList";
 import ClassHistoryDetail from "./pages/ClassHistoryDetail";
 import ManageListPage from "./pages/ManageListPage";
 import NewRegister from "./pages/NewRegister";
-import StudentList from "./pages/StudentList";
+import Summary from "./pages/Summary";
 
 function App() {
   return (
@@ -72,8 +72,8 @@ function App() {
           <Route path="/manage-list" element={
               <ProtectedRoute role="admin"><ManageListPage /></ProtectedRoute>
           } />
-          <Route path="/Student-list" element={
-              <ProtectedRoute role="teacher"><StudentList /></ProtectedRoute>
+          <Route path="/summary" element={
+              <ProtectedRoute role="teacher"><Summary /></ProtectedRoute>
           } />
         </Routes>
       </Router>
