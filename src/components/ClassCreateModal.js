@@ -50,7 +50,7 @@ export default function ClassCreateModal({ onCreated }) {
       const teacherName = cleanName(teacherRow[5]);
 
       const students = [];
-      for (let i = 9; i < rows.length; i++) {
+      for (let i = 8; i < rows.length; i++) {
         const row = rows[i];
         const studentId = row[1];
         const fullName = row[2];
