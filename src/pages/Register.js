@@ -14,7 +14,8 @@ const Register = () => {
 
   const navigate = useNavigate();
 
-  const studentIdPattern = /^\d{13}$/;
+  // แก้ pattern สำหรับรูปแบบใหม่ เช่น 64-040626-3635-8
+  const studentIdPattern = /^\d{2}-\d{6}-\d{4}-\d{1}$/;
   const fullNamePattern = /^(นาย|นางสาว|นาง)[^\s]+ [^\s]+$/;
 
   const isStudentIdValid = studentIdPattern.test(studentId.trim());
@@ -26,7 +27,7 @@ const Register = () => {
     setError("");
 
     if (!isStudentIdValid) {
-      setError("❗ รหัสนักศึกษาต้องเป็นตัวเลข 13 หลัก");
+      setError("❗ รหัสนักศึกษาต้องอยู่ในรูปแบบ xx-xxxxxx-xxxx-x");
       setLoading(false);
       return;
     }
@@ -67,7 +68,9 @@ const Register = () => {
 
   const handleCopy = () => {
     if (!generatedCredentials) return;
-    const text = `Username: ${generatedCredentials.username}\nPassword: ${generatedCredentials.password}`;
+    const username = generatedCredentials.username.replaceAll("-", "");
+    const password = generatedCredentials.password.replaceAll("-", "");
+    const text = `Username: ${username}\nPassword: ${password}`;
     navigator.clipboard.writeText(text);
     alert("📋 คัดลอกสำเร็จ!");
   };
@@ -81,17 +84,17 @@ const Register = () => {
           <label className="form-label">Student ID</label>
           <input
             type="text"
-            placeholder="เช่น 6505012345678"
+            placeholder="เช่น 64-040626-3635-8"
             className={`form-control mb-2 ${
               studentId ? (isStudentIdValid ? "input-valid" : "input-invalid") : ""
             }`}
             value={studentId}
             onChange={(e) => setStudentId(e.target.value)}
-            maxLength={13}
+            maxLength={17}
             required
             disabled={loading}
           />
-          <div className="register-note">* ต้องเป็นตัวเลข 13 หลัก</div>
+          <div className="register-note">* รูปแบบ: 6x-0406xx-xxxx-x</div>
 
           <label className="form-label mt-3 text-green">Full Name</label>
           <input
@@ -126,14 +129,14 @@ const Register = () => {
               type="text"
               className="form-control mb-2"
               readOnly
-              value={generatedCredentials.username}
+              value={generatedCredentials.username.replaceAll("-", "")}
             />
             <p><strong>Password</strong></p>
             <input
               type="text"
               className="form-control mb-2"
               readOnly
-              value={generatedCredentials.password}
+              value={generatedCredentials.password.replaceAll("-", "")}
             />
             <button
               className="btn btn-copy w-100"
