@@ -12,9 +12,8 @@ export default function ClassCreateModal({ onCreated }) {
   const [filter, setFilter] = useState('');
   const [valid, setValid] = useState(false);
 
-  const cleanName = (raw) => raw
-    .replace(/ผู้สอน/g, '')
-    .trim();
+  const cleanName = (raw) => raw.replace(/ผู้สอน/g, '').trim();
+  const cleanFullName = (name) => name.replace(/[-]+/g, ' ').replace(/\s+/g, ' ').trim();
 
   const handleFileSelect = async (e) => {
     const selectedFile = e.target.files[0];
@@ -44,24 +43,47 @@ export default function ClassCreateModal({ onCreated }) {
         return;
       }
 
+      // ✅ เช็กว่าแถวที่ 8 ต้องมีหัว "เลข" และ "ชื่อ"
+      const headerRow = rows[7];
+      if (!headerRow || !headerRow[1]?.toString().includes('เลข') || !headerRow[2]?.toString().includes('ชื่อ')) {
+        alert('❌ รูปแบบไฟล์ไม่ถูกต้อง: ไม่พบหัวคอลัมน์ "เลข" หรือ "ชื่อ - สกุล" ที่แถวที่ 8');
+        return;
+      }
+
       const courseParts = courseRow[0].split(/\s+/);
       const courseCode = courseParts[1] || '000000';
-      const courseName = courseParts.slice(2).join(' ') || 'ไม่พบชื่อวิชา';
+      const fullCourseName = courseParts.slice(2).join(' ');
+      const sectionMatch = fullCourseName.match(/ตอน\s*(\d+)/);
+      const section = sectionMatch ? sectionMatch[1] : '1';
+      const courseName = fullCourseName.replace(/ตอน\s*\d+/, '').trim();
       const teacherName = cleanName(teacherRow[5]);
 
       const students = [];
+      const seen = new Set();
+
       for (let i = 8; i < rows.length; i++) {
         const row = rows[i];
-        const studentId = row[1];
-        const fullName = row[2];
-        const sectionCell = row[3];
-        if (studentId && fullName) {
-          students.push({
-            studentId,
-            fullName,
-            section: sectionCell || '1'
-          });
+        const studentId = String(row[1] || '').trim();
+        const fullName = cleanFullName(String(row[2] || ''));
+
+        if (!studentId && !fullName) {
+          const hasMore = rows.slice(i + 1).some(r => (r[1]?.toString().trim() || r[2]?.toString().trim()));
+          if (hasMore) {
+            alert(`❌ พบแถวว่างก่อนจบรายชื่อ (แถวที่ ${i + 1})`);
+            return;
+          }
+          break;
         }
+
+        if (!studentId || !fullName) {
+          alert(`❌ ข้อมูลไม่ครบในแถวที่ ${i + 1}`);
+          return;
+        }
+
+        if (seen.has(studentId)) continue;
+        seen.add(studentId);
+
+        students.push({ studentId, fullName, section });
       }
 
       if (students.length === 0) {
@@ -69,7 +91,7 @@ export default function ClassCreateModal({ onCreated }) {
         return;
       }
 
-      setPreview({ courseCode, courseName, teacherName, section: students[0]?.section || '1' });
+      setPreview({ courseCode, courseName, teacherName, section });
       setStudentsPreview(students);
       setValid(true);
 
