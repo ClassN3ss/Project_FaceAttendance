@@ -1,0 +1,10 @@
+body {
+  background: radial-gradient(circle at center, #15803d, #0f3d26, #0D2212);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center;
+  min-height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+  color: #d1fae5;
+}

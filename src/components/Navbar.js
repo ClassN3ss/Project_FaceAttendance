@@ -72,6 +72,7 @@ const Navbar = () => {
           <>
             <Link className="nav-link" to="/teacher-dashboard" onClick={closeMenu}>Dashboard</Link>
             <Link className="nav-link" to="/class-historylist" onClick={closeMenu}>History</Link>
+            <Link className="nav-link" to="/student-list" onClick={closeMenu}>Studentlist</Link>
           </>
         );
       case "admin":
