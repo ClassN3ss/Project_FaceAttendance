@@ -98,7 +98,6 @@ export default function ClassCreateModal({ onCreated }) {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('email', email.trim());
-    formData.append('section', preview.section);
 
     try {
       await API.post('/classes/create', formData);
