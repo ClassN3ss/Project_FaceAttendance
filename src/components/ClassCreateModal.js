@@ -13,7 +13,7 @@ export default function ClassCreateModal({ onCreated }) {
   const [valid, setValid] = useState(false);
 
   const cleanName = (raw) => raw
-    .replace(/\b(ศ\.|รศ\.|ผศ\.|อ\.|ดร\.|อาจารย์|ศาสตราจารย์|รองศาสตราจารย์|ผู้ช่วยศาสตราจารย์|ผู้สอน)\b\s*/g, '')
+    .replace(/ผู้สอน/g, '')
     .trim();
 
 
