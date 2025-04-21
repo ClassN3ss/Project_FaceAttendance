@@ -81,7 +81,7 @@ const StudentList = () => {
   }, [students, selectedSectionId, token]);
 
   return (
-    <div className="container mt-4">
+    <div className="container">
       <h2>📚 รายชื่อนักศึกษาในวิชาที่สอน</h2>
 
       <div className="row mb-3">
@@ -134,7 +134,7 @@ const StudentList = () => {
               const present = stat?.present || 0;
 
               return (
-                <li key={idx} className="list-group-item student-item">
+                <li key={idx} className="list-group-item">
                   <div className="d-flex justify-content-between align-items-center">
                     <div>
                       <strong>{sid}</strong> - {s.fullName}
