@@ -19,16 +19,21 @@ const NewRegister = () => {
   const trimmedName = fullName.trim();
   const trimmedEmail = email.trim();
 
-  const isValidId = /^\d{13}$/.test(trimmedId);
+  const studentIdPattern = /^\d{2}-\d{6}-\d{4}-\d{1}$/;
+  const isValidId = studentIdPattern.test(trimmedId);
   const isValidName = /^(นาย|นางสาว|นาง)[^\s]+ [^\s]+$/.test(trimmedName);
-  const isValidEmail = new RegExp(`^s${trimmedId}@email\\.kmutnb\\.ac\\.th$`).test(trimmedEmail);
+
+  // ลบขีดก่อนเช็คอีเมล
+  const strippedId = trimmedId.replace(/-/g, "");
+  const expectedEmail = `s${strippedId}@email.kmutnb.ac.th`;
+  const isValidEmail = trimmedEmail === expectedEmail;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
     if (!isValidId) {
-      setError("❗ รหัสนักศึกษาต้องเป็นตัวเลข 13 หลัก");
+      setError("❗ รหัสนักศึกษาต้องอยู่ในรูปแบบ xx-xxxxxx-xxxx-x");
       return;
     }
 
@@ -38,16 +43,16 @@ const NewRegister = () => {
     }
 
     if (!isValidEmail) {
-      setError(`❗ Email ต้องเป็น s${trimmedId}@email.kmutnb.ac.th เท่านั้น`);
+      setError(`❗ Email ต้องเป็น ${expectedEmail} เท่านั้น`);
       return;
     }
 
     setLoading(true);
     try {
       const res = await axios.post("https://backendfaceattendance-production.up.railway.app/auth/new-register", {
-        studentId,
-        fullName,
-        email,
+        studentId: trimmedId,
+        fullName: trimmedName,
+        email: trimmedEmail,
       });
       setGenerated(res.data);
     } catch (err) {
@@ -90,14 +95,14 @@ const NewRegister = () => {
             <input
               type="text"
               className={`form-control mb-2 ${studentId && (isValidId ? "input-valid" : "input-invalid")}`}
-              placeholder="เช่น 6505012345678"
+              placeholder="เช่น 64-040626-3635-8"
               value={studentId}
               onChange={(e) => setStudentId(e.target.value)}
-              maxLength={13}
+              maxLength={17}
               disabled={loading}
               required
             />
-            <div className="newregister-note">* ต้องเป็นตัวเลข 13 หลัก</div>
+            <div className="newregister-note">* รูปแบบต้องเป็น xx-xxxxxx-xxxx-x</div>
 
             <label className="form-label mt-3">👤 ชื่อ-นามสกุล</label>
             <input
@@ -117,14 +122,14 @@ const NewRegister = () => {
             <input
               type="email"
               className={`form-control mb-2 ${email && (isValidEmail ? "input-valid" : "input-invalid")}`}
-              placeholder="เช่น s6505012345678@email.com"
+              placeholder={`เช่น s${strippedId}@email.kmutnb.ac.th`}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={loading}
               required
             />
             <div className="newregister-note">
-              * รูปแบบต้องตรงกับ <code className="newregister-code">s6x040626xxxxx@email.kmutnb.ac.th</code>
+              * ต้องตรงกับ <code className="newregister-code">{`s${strippedId}@email.kmutnb.ac.th`}</code>
             </div>
 
             {error && <div className="text-danger mt-3 mb-2">{error}</div>}
