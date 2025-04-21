@@ -131,12 +131,17 @@ const StudentList = () => {
             {students.map((s, idx) => {
               const sid = String(s.studentId || s.username || "").trim();
               const stat = stats[sid];
+              const present = stat?.present || 0;
 
               return (
-                <li key={idx} className="list-group-item">
-                  <div><strong>{sid}</strong> - {s.fullName}</div>
-                  <div className="mt-1 small text-muted-list">
-                    ✔️ มาเรียน: {stat?.present || 0} ครั้ง&nbsp;&nbsp;
+                <li key={idx} className="list-group-item student-item">
+                  <div className="d-flex justify-content-between align-items-center">
+                    <div>
+                      <strong>{sid}</strong> - {s.fullName}
+                    </div>
+                    <span className="badge bg-primary fs-6">
+                      ✅ มาเรียนทั้งหมด: {present} ครั้ง
+                    </span>
                   </div>
                 </li>
               );
