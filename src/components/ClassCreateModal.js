@@ -44,11 +44,11 @@ export default function ClassCreateModal({ onCreated }) {
       }
 
       // ✅ เช็กว่าแถวที่ 8 ต้องมีหัว "เลข" และ "ชื่อ"
-      const headerRow = rows[7];
-      if (!headerRow || !headerRow[1]?.toString().includes('เลข') || !headerRow[2]?.toString().includes('ชื่อ')) {
-        alert('❌ รูปแบบไฟล์ไม่ถูกต้อง: ไม่พบหัวคอลัมน์ "เลข" หรือ "ชื่อ - สกุล" ที่แถวที่ 8');
+      const headerRow = rows[6];
+      if (!headerRow || !headerRow[1]?.toString().match(/เลขประจำตัว/i) || !headerRow[2]?.toString().match(/ชื่อ - สกุล/i)) {
+        alert('❌ รูปแบบไฟล์ไม่ถูกต้อง: ไม่พบหัวคอลัมน์ที่มีคำว่า "เลข" หรือ "ชื่อ" ในแถวที่ 8');
         return;
-      }
+      }      
 
       const courseParts = courseRow[0].split(/\s+/);
       const courseCode = courseParts[1] || '000000';
