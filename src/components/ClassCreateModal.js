@@ -108,10 +108,9 @@ export default function ClassCreateModal({ onCreated }) {
 
   const handleEmailChange = (e) => {
     const value = e.target.value.toLowerCase();
-    const emailRegex = /^[a-z0-9@.]*$/;
-    if (emailRegex.test(value)) {
-      setEmail(value);
-    }
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    setEmail(value);
+    setValid(file && emailRegex.test(value));
   };
 
   const handleCreate = async () => {

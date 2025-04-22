@@ -84,19 +84,17 @@ const Summary = () => {
   const exportToExcel = () => {
     const workbook = XLSX.utils.book_new();
   
-    // เตรียม header และ max row
+    // เตรียม header
     const headers = [["ลำดับ", "เลขประจำตัว", "ชื่อ", "คะแนน"]];
-    const maxRows = 36;
     const data = [];
   
-    for (let i = 0; i < maxRows; i++) {
-      const student = students[i];
-      const sid = student ? String(student.studentId || student.username || "").trim() : "";
-      const name = student ? student.fullName : "";
+    students.forEach((student, i) => {
+      const sid = String(student.studentId || student.username || "").trim();
+      const name = student.fullName;
       const stat = stats[sid];
-      const present = student ? (stat?.present || 0) : "";
+      const present = stat?.present || 0;
       data.push([i + 1, sid, name, present]);
-    }
+    });
   
     const allData = [...headers, ...data];
     const worksheet = XLSX.utils.aoa_to_sheet(allData);
@@ -104,17 +102,17 @@ const Summary = () => {
     // ตั้งค่าความกว้างคอลัมน์
     worksheet["!cols"] = [
       { wch: 8 },  // ลำดับ
-      { wch: 22 }, // เลขประจำตัว
+      { wch: 15 }, // รหัส
       { wch: 35 }, // ชื่อ
       { wch: 10 }  // คะแนน
     ];
   
     // สร้าง style
     const border = {
-      top: { style: "thin" },
-      bottom: { style: "thin" },
-      left: { style: "thin" },
-      right: { style: "thin" },
+      top: { style: "thick" },
+      bottom: { style: "thick" },
+      left: { style: "thick" },
+      right: { style: "thick" },
     };
   
     const cellStyle = {
@@ -141,15 +139,14 @@ const Summary = () => {
   
     XLSX.utils.book_append_sheet(workbook, worksheet, "รายชื่อนักศึกษา");
   
-    const excelBuffer = XLSX.write(workbook, {
+    const filename = `รายชื่อนักศึกษา_${courseCode}_${courseName}_ตอน${section}.xlsx`;
+    saveAs(new Blob([XLSX.write(workbook, {
       bookType: "xlsx",
       type: "array",
-      cellStyles: true
-    });
-  
-    const filename = `รายชื่อนักศึกษา_${courseCode}_${courseName}_ตอน${section}.xlsx`;
-    saveAs(new Blob([excelBuffer], { type: "application/octet-stream" }), filename);
-  };      
+      cellStyles: true,
+    })], { type: "application/octet-stream" }), filename);
+
+  };        
 
   return (
     <div className="container">
