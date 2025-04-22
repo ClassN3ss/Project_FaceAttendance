@@ -23,7 +23,7 @@ export default function ClassCreateModal({ onCreated }) {
     const students = [];
 
     const isSectionInvalid = (section) => {
-      if (section === '0') return true;
+      if (section === '0') return false;
       if (section.startsWith('0')) return true;
       if (/[\/\-\+]/.test(section)) return true;
       return false;
@@ -222,7 +222,7 @@ export default function ClassCreateModal({ onCreated }) {
   return (
     <>
       <button onClick={() => setModalOpen(true)} className="btn btn-primary mb-3">
-        + สร้างคลาสด้วยไฟล์ .xlsx
+        สร้างคลาสด้วยไฟล์ .xlsx
       </button>
 
       {modalOpen && (
@@ -256,12 +256,12 @@ export default function ClassCreateModal({ onCreated }) {
               <input
                 type="text"
                 className="form-control mb-2"
-                placeholder="🔍 ค้นหานักศึกษา..."
+                placeholder=" ค้นหานักศึกษา..."
                 value={filter}
                 onChange={e => setFilter(e.target.value)}
               />
               <div className="alert alert-info" style={{ maxHeight: 300, overflowY: 'auto' }}>
-                <strong>👨‍🎓 รายชื่อนักศึกษา ({filteredStudents.length} คน)</strong>
+                <strong> รายชื่อนักศึกษา ({filteredStudents.length} คน)</strong>
                 <ul className="mb-0 small">
                   {filteredStudents.map((s, i) => (
                     <li key={i}>
@@ -278,7 +278,7 @@ export default function ClassCreateModal({ onCreated }) {
             disabled={!file || !valid || !email}
             onClick={handleCreate}
           >
-            ✅ สร้างคลาส
+             สร้างคลาส
           </button>
         </div>
       )}

@@ -37,12 +37,12 @@ export default function EditUserModal({ show, onHide, user, onUpdated }) {
   return (
     <Modal show={show} onHide={onHide} centered>
       <Modal.Header closeButton>
-        <Modal.Title>📝 แก้ไขข้อมูลผู้ใช้</Modal.Title>
+        <Modal.Title> แก้ไขข้อมูลผู้ใช้</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <Form>
           <Form.Group className="mb-2">
-            <Form.Label>ชื่อ - สกุล</Form.Label>
+            <Form.Label>ชื่อ - สกุล / First name Last name</Form.Label>
             <Form.Control
               type="text"
               value={fullName}
@@ -50,7 +50,7 @@ export default function EditUserModal({ show, onHide, user, onUpdated }) {
             />
           </Form.Group>
           <Form.Group className="mb-2">
-            <Form.Label>รหัสผู้ใช้ / Username</Form.Label>
+            <Form.Label>ผู้ใช้ / Username</Form.Label>
             <Form.Control
               type="text"
               value={username}
@@ -58,7 +58,7 @@ export default function EditUserModal({ show, onHide, user, onUpdated }) {
             />
           </Form.Group>
           <Form.Group className="mb-2">
-            <Form.Label>อีเมล</Form.Label>
+            <Form.Label>อีเมล / Email </Form.Label>
             <Form.Control
               type="email"
               value={email}
@@ -66,7 +66,7 @@ export default function EditUserModal({ show, onHide, user, onUpdated }) {
             />
           </Form.Group>
           <Form.Group>
-            <Form.Label>บทบาท</Form.Label>
+            <Form.Label>บทบาท / Role </Form.Label>
             <Form.Select
               value={role}
               onChange={(e) => setRole(e.target.value)}
@@ -83,7 +83,7 @@ export default function EditUserModal({ show, onHide, user, onUpdated }) {
           ยกเลิก
         </Button>
         <Button variant="primary" onClick={handleSave}>
-          💾 บันทึก
+           บันทึก
         </Button>
       </Modal.Footer>
     </Modal>

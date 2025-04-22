@@ -90,7 +90,7 @@ const Navbar = () => {
   return (
     <nav className="navbar navbar-expand-lg navbar-custom px-3">
       <div className="container-fluid">
-        <span className="navbar-brand">🎓 Face Attendance</span>
+        <span className="navbar-brand"> Face Attendance</span>
         <button
           className={`navbar-toggler ${menuOpen ? "active" : ""}`}
           type="button"
@@ -127,7 +127,7 @@ const Navbar = () => {
                     <div className="dropdown-role">{user.role}</div>
                     <hr />
                     <button className="btn btn-sm logout-btn" onClick={handleLogout}>
-                      🚪 Logout
+                      Logout
                     </button>
                   </div>
                 )}

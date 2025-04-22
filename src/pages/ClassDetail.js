@@ -102,7 +102,7 @@ const ClassDetail = () => {
 
   const handleOpenSession = async () => {
     if (!classInfo.openAt || !classInfo.closeAt) {
-      return alert("⏰ กรุณาระบุเวลาให้ครบก่อน");
+      return alert("กรุณาระบุเวลาให้ครบก่อน");
     }
   
     if (classInfo.withTeacherFace && !user.faceScanned) {
@@ -111,7 +111,6 @@ const ClassDetail = () => {
     }
   
     try {
-      // ⛔ ตรวจสอบว่ามี session ที่ยังเปิดอยู่ในห้องนี้อยู่หรือไม่
       const check = await API.get(`/checkin-sessions/class/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -203,12 +202,12 @@ const ClassDetail = () => {
     window.location.reload();
   };
 
-  if (loading) return <div className="container mt-4">⏳ กำลังโหลดข้อมูลห้อง...</div>;
+  if (loading) return <div className="container mt-4">กำลังโหลดข้อมูลห้อง...</div>;
   if (!classInfo) return <div className="container mt-4 text-danger">❌ ไม่พบข้อมูลห้องเรียน</div>;
 
   return (
     <div className="container">
-      <h3>📘 รายละเอียดห้องเรียน</h3>
+      <h3>รายละเอียดห้องเรียน</h3>
       <p><strong>รหัสวิชา:</strong> {classInfo.courseCode}</p>
       <p><strong>ชื่อวิชา:</strong> {classInfo.courseName}</p>
       <p><strong>ตอนเรียน:</strong> {classInfo.section}</p>
@@ -217,7 +216,7 @@ const ClassDetail = () => {
       {activeSession && (
         <>
           <hr />
-          <h5>🕐 Session ล่าสุดที่กำลังเปิด</h5>
+          <h5>Session ล่าสุดที่กำลังเปิด</h5>
           <table className="table table-bordered">
             <thead>
               <tr><th>วัน</th><th>เวลาเปิด</th><th>เวลาปิด</th><th>ต้องสแกนใบหน้าอาจารย์</th><th>สถานะ</th><th>ยกเลิก</th></tr>
@@ -240,20 +239,20 @@ const ClassDetail = () => {
 
       <Modal show={showConfirmModal} onHide={() => setShowConfirmModal(false)} centered>
         <Modal.Header closeButton>
-          <Modal.Title>⚠️ ยืนยันการปิด Session</Modal.Title>
+          <Modal.Title>! ยืนยันการปิด Session</Modal.Title>
         </Modal.Header>
         <Modal.Body>คุณแน่ใจหรือไม่ว่าต้องการ <strong>ปิด session</strong> นี้?</Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowConfirmModal(false)}>ยกเลิก</Button>
           <Button variant="danger" onClick={() => { setShowConfirmModal(false); handleCloseSession(); }}>
-            ✅ ยืนยัน
+             ยืนยัน
           </Button>
         </Modal.Footer>
       </Modal>
 
       <hr />
       <h5 style={{ cursor: "pointer" }} onClick={() => setShowCheckinTimeInputs(prev => !prev)}>
-        📅 เปิดเวลาเช็คชื่อ {showCheckinTimeInputs ? "⬆️" : "⬇️"}
+         เปิดเวลาเช็คชื่อ {showCheckinTimeInputs ? "^" : "*"}
       </h5>
 
       {showCheckinTimeInputs && (
@@ -299,7 +298,7 @@ const ClassDetail = () => {
             </div>
           </div>
           <div className="col-md-3">
-            <button className="btn btn-primary w-100" onClick={handleOpenSession}>✅ เปิด</button>
+            <button className="btn btn-primary w-100" onClick={handleOpenSession}>เปิด</button>
           </div>
 
           {classInfo.withMapPreview && (
@@ -364,7 +363,7 @@ const ClassDetail = () => {
 
       <Modal show={showFaceModal} onHide={() => setShowFaceModal(false)} centered>
         <Modal.Header closeButton>
-          <Modal.Title>⚠️ ต้องบันทึกใบหน้า</Modal.Title>
+          <Modal.Title>! ต้องบันทึกใบหน้า</Modal.Title>
         </Modal.Header>
         <Modal.Body>กรุณาบันทึกใบหน้าอาจารย์ก่อนเปิดห้อง</Modal.Body>
         <Modal.Footer>
@@ -374,9 +373,9 @@ const ClassDetail = () => {
       </Modal>
 
       <hr />
-      <h5>📩 คำร้องขอเข้าห้องเรียน</h5>
+      <h5>คำร้องขอเข้าห้องเรียน</h5>
       {requests.length === 0 ? (
-        <p className="text-muted">🙅‍♂️ ไม่มีคำร้อง</p>
+        <p className="text-muted">ไม่มีคำร้อง</p>
       ) : (
         <ul className="list-group mb-4">
           {requests.map((r) => (
@@ -392,7 +391,7 @@ const ClassDetail = () => {
       )}
 
       <hr />
-      <h5>👨‍🎓 รายชื่อนักเรียน ({classInfo.students?.length || 0} คน)</h5>
+      <h5>รายชื่อนักเรียน ({classInfo.students?.length || 0} คน)</h5>
       {classInfo.students?.length === 0 ? (
         <p className="text-muted">ยังไม่มีนักเรียนในห้องนี้</p>
       ) : (
@@ -412,10 +411,10 @@ const ClassDetail = () => {
             state: { classId: classInfo._id }
           })}
         >
-          📅 ดูประวัติการเช็คชื่อทั้งหมด
+           ดูประวัติการเช็คชื่อทั้งหมด
         </button>
         <button className="btn btn-outline-danger bg-light-red" onClick={() => navigate(-1)}>
-          🔙 กลับ
+           กลับ
         </button>
       </div>
     </div>

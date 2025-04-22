@@ -150,11 +150,11 @@ const Summary = () => {
 
   return (
     <div className="container">
-      <h2>📚 รายชื่อนักศึกษาในวิชาที่สอน</h2>
+      <h2>รายชื่อนักศึกษาในวิชาที่สอน</h2>
   
       <div className="row mb-3 align-items-end">
         <div className="col-md-5">
-          <label>📘 เลือกรหัสวิชา</label>
+          <label>เลือกรหัสวิชา</label>
           <select
             className="form-select"
             value={selectedCourse}
@@ -175,7 +175,7 @@ const Summary = () => {
         </div>
   
         <div className="col-md-5">
-          <label>🧾 เลือกตอนเรียน</label>
+          <label>เลือกตอนเรียน</label>
           <select
             className="form-select"
             value={selectedSectionId}
@@ -205,7 +205,7 @@ const Summary = () => {
   
       {selectedSectionId && students.length > 0 && (
         <>
-          <h3>📋 รายชื่อนักศึกษา ({students.length} คน)</h3>
+          <h3>รายชื่อนักศึกษา ({students.length} คน)</h3>
           <ul className="list-group mt-3">
             {students.map((s, idx) => {
               const sid = String(s.studentId || s.username || "").trim();

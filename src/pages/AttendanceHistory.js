@@ -80,11 +80,11 @@ const AttendanceHistory = () => {
 
   return (
     <div className="container">
-      <h2 className="mb-4">📜 ประวัติการเช็คชื่อ</h2>
+      <h2 className="mb-4">ประวัติการเช็คชื่อ</h2>
 
       <div className="filter-row">
         <div>
-          <label>📝 เลือกวิชา</label>
+          <label>เลือกวิชา</label>
           <Select
             className="react-select-container"
             classNamePrefix="react-select"
@@ -134,7 +134,7 @@ const AttendanceHistory = () => {
           />
         </div>
         <div>
-          <label>📅 เลือกวันที่</label>
+          <label>เลือกวันที่</label>
           <input
             type="date"
             className="filter-date"
@@ -182,7 +182,7 @@ const AttendanceHistory = () => {
             {paginatedData.length === 0 && (
               <tr>
                 <td colSpan="5" className="text-center text-muted">
-                  ❗ ไม่พบข้อมูล
+                  ! ไม่พบข้อมูล
                 </td>
               </tr>
             )}
@@ -197,7 +197,7 @@ const AttendanceHistory = () => {
             disabled={currentPage === 1}
             onClick={() => setCurrentPage(currentPage - 1)}
           >
-            ⬅️ ย้อนกลับ
+            ย้อนกลับ
           </button>
 
           <span className="page-indicator">
@@ -209,7 +209,7 @@ const AttendanceHistory = () => {
             disabled={currentPage === totalPages}
             onClick={() => setCurrentPage(currentPage + 1)}
           >
-            หน้าถัดไป ➡️
+            หน้าถัดไป
           </button>
         </div>
       )}

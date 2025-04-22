@@ -23,13 +23,13 @@ function TeacherDashboard() {
 
   return (
     <div className="container">
-      <h2>📘 Welcome {user ? user.fullName : "คุณครู"}</h2>
+      <h2>Welcome {user ? user.fullName : "คุณครู"}</h2>
 
       <div className="mb-4">
-        <h4>📚 ห้องเรียนของฉัน</h4>
+        <h4>ห้องเรียนของฉัน</h4>
         <ul className="list-group mb-3">
           {classes.length === 0 ? (
-            <li className="list-group-item text-muted">📝 ยังไม่มีห้องเรียน</li>
+            <li className="list-group-item text-muted">ยังไม่มีห้องเรียน</li>
           ) : (
             classes.map((cls) => (
               <li key={cls._id} className="list-group-item d-flex justify-content-between align-items-center">
@@ -40,7 +40,7 @@ function TeacherDashboard() {
                   className="btn btn-outline-secondary btn-sm"
                   onClick={() => window.location.href = `/class-detail/${cls._id}`}
                 >
-                  🔍 ดูรายละเอียด
+                  - ดูรายละเอียด
                 </button>
               </li>
             ))

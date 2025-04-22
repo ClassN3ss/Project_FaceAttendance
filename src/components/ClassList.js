@@ -38,7 +38,7 @@ export default function ClassList() {
 
   return (
     <div>
-      <h5>📚 รายวิชาทั้งหมด</h5>
+      <h5> รายวิชาทั้งหมด</h5>
       <table className="table table-bordered table-sm">
         <thead>
           <tr>
@@ -62,7 +62,7 @@ export default function ClassList() {
                   className="btn btn-sm btn-outline-primary"
                   onClick={() => handleView(cls.students, cls._id)} // ✅ ส่ง classId
                 >
-                  👁 ดูรายชื่อ ({cls.students?.length || 0})
+                   ดูรายชื่อ ({cls.students?.length || 0})
                 </button>
               </td>
               <td>

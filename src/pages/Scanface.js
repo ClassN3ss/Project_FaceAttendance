@@ -12,7 +12,7 @@ const Scanface = () => {
   const { classId } = useParams();
 
   const [session, setSession] = useState(null);
-  const [message, setMessage] = useState("🔍 โปรดหันหน้าตรง แล้วกด 'เริ่มสแกนใบหน้า'");
+  const [message, setMessage] = useState("โปรดหันหน้าตรง แล้วกด 'เริ่มสแกนใบหน้า'");
   const [loading, setLoading] = useState(false);
   const [videoReady, setVideoReady] = useState(false);
 
@@ -40,13 +40,13 @@ const Scanface = () => {
 
   const loadModels = useCallback(async () => {
     try {
-      setMessage("🔄 กำลังโหลดโมเดล...");
+      setMessage("กำลังโหลดโมเดล...");
       await Promise.all([
         faceapi.nets.ssdMobilenetv1.loadFromUri("/models"),
         faceapi.nets.faceLandmark68Net.loadFromUri("/models"),
         faceapi.nets.faceRecognitionNet.loadFromUri("/models"),
       ]);
-      setMessage("📷 กล้องพร้อมแล้ว! กดปุ่มเพื่อเริ่มสแกน");
+      setMessage("กล้องพร้อมแล้ว! กดปุ่มเพื่อเริ่มสแกน");
       await startCamera();
     } catch {
       setMessage("❌ โหลดโมเดลไม่สำเร็จ");
@@ -60,8 +60,8 @@ const Scanface = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      console.log("🕒 [Client Now]:", new Date().toISOString());
-      console.log("📦 [Session Time]:", res.data?.openAt, res.data?.closeAt);
+      console.log("[Client Now]:", new Date().toISOString());
+      console.log("[Session Time]:", res.data?.openAt, res.data?.closeAt);
       setSession(res.data);
     } catch {
       setMessage("❌ ขณะนี้ยังไม่มี session เปิดอยู่ กรุณารออาจารย์");
@@ -116,7 +116,7 @@ const Scanface = () => {
 
   const handleNormalCheckin = async (payload, token) => {
     try {
-      console.log("📤 ส่งเช็คชื่อ payload:", payload);
+      console.log("ส่งเช็คชื่อ payload:", payload);
       await API.post("/attendance/checkin", payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -131,18 +131,18 @@ const Scanface = () => {
   };
 
   const redirectToTeacherScan = (payload) => {
-    alert("📣 สแกนใบหน้าอาจารย์เพื่อยืนยันตัวตนก่อนเช็คชื่อ");
+    alert("สแกนใบหน้าอาจารย์เพื่อยืนยันตัวตนก่อนเช็คชื่อ");
     sessionStorage.setItem("studentDescriptor", JSON.stringify(payload));
     stopCamera();
     navigate(`/verifyface-teacher/${classId}`, { replace: true });
   };
 
   const scanFace = async () => {
-    if (!videoReady) return setMessage("📷 รอกล้องโหลดให้เสร็จก่อน...");
+    if (!videoReady) return setMessage("รอกล้องโหลดให้เสร็จก่อน...");
     if (!session) return setMessage("❌ ไม่พบ session ที่เชื่อมกับห้องนี้");
 
     setLoading(true);
-    setMessage("🔎 กำลังตรวจจับใบหน้า...");
+    setMessage("กำลังตรวจจับใบหน้า...");
 
     try {
       const detections = await faceapi
@@ -161,23 +161,23 @@ const Scanface = () => {
       const { latitude, longitude } = await getGPSLocation();
 
       if (session?.location?.latitude && session?.location?.longitude) {
-        console.log("📌 พิกัดอาจารย์:", session.location.latitude, session.location.longitude);
-        console.log("📍 พิกัดนักศึกษา:", latitude, longitude);
+        console.log("- พิกัดอาจารย์:", session.location.latitude, session.location.longitude);
+        console.log("- พิกัดนักศึกษา:", latitude, longitude);
         const distance = calculateDistance(
           session.location.latitude,
           session.location.longitude,
           latitude,
           longitude
         );
-        console.log("📏 คำนวณระยะห่าง:", distance.toFixed(2), "เมตร");
+        console.log("คำนวณระยะห่าง:", distance.toFixed(2), "เมตร");
 
         if (distance > 100) {
           const place = await reverseGeocode(latitude, longitude);
           setMessage(
             `❌ คุณอยู่นอกพื้นที่เช็คชื่อ (ห่าง ${Math.round(distance)} เมตร)\n` +
-              `📍 พิกัดของคุณ: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}\n` +
-              `🗺️ สถานที่: ${place}` +
-              (session.location.name ? `\n📌 จุดหมายเช็คชื่อ: ${session.location.name}` : "")
+              `* พิกัดของคุณ: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}\n` +
+              `- สถานที่: ${place}` +
+              (session.location.name ? `\n- จุดหมายเช็คชื่อ: ${session.location.name}` : "")
           );
           setLoading(false);
           return;
@@ -219,7 +219,7 @@ const Scanface = () => {
 
   return (
     <div className="container text-center">
-      <h2>📸 สแกนใบหน้า</h2>
+      <h2>สแกนใบหน้า</h2>
       <p>{message}</p>
 
       <div className="d-flex justify-content-center my-3">
@@ -246,7 +246,7 @@ const Scanface = () => {
             navigate(-1);
           }}
         >
-          🔙 กลับ
+          กลับ
         </button>
       </div>
     </div>

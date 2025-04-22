@@ -145,7 +145,7 @@ const StudentDashboard = () => {
             {cls.courseCode} - {cls.courseName} Section {cls.section}
           </div>
           <hr className="my-2" />
-          <div className="text-muted">👨‍🏫 {cls.teacherId?.fullName}</div>
+          <div className="text-muted">{cls.teacherId?.fullName}</div>
         </div>
 
         {showJoinButton && (
@@ -157,19 +157,19 @@ const StudentDashboard = () => {
                     className="custom-btn-primary btn btn-sm"
                     onClick={() => navigate(`/class/${cls._id}/checkin`)}
                   >
-                    🔓 เข้าห้องเรียน
+                    - เข้าห้องเรียน
                   </button>
                 )}
                 <div className="custom-text-success">✅ ได้เข้าร่วมแล้ว</div>
               </>
             ) : hasRequested(cls._id) ? (
-              <span className="custom-text-warning">⏳ รออนุมัติ</span>
+              <span className="custom-text-warning">* รออนุมัติ</span>
             ) : (
               <button
                 className="btn btn-sm btn-outline-primary"
                 onClick={() => handleRequestJoin(cls._id)}
               >
-                ✉️ ขอเข้าร่วม
+                 ขอเข้าร่วม
               </button>
             )}
           </div>
@@ -180,7 +180,7 @@ const StudentDashboard = () => {
 
   return (
     <div className="container dashboard-container">
-      <h2 className="welcome-header">🎓 Welcome {user.fullName}</h2>
+      <h2 className="welcome-header">Welcome {user.fullName}</h2>
 
       <div className="card p-4 shadow mt-3 profile-card">
         <h4>{user.studentId} {user.fullName}</h4>
@@ -190,28 +190,28 @@ const StudentDashboard = () => {
       <input
         type="text"
         className="custom-input my-4 search-input"
-        placeholder="🔍 ค้นหาวิชา / รหัสวิชา / อาจารย์..."
+        placeholder="ค้นหาวิชา / รหัสวิชา / อาจารย์..."
         value={searchTerm}
         onChange={(e) => setSearchTerm(e.target.value)}
       />
 
       {searchResults.length > 0 && (
         <>
-          <h4 className="section-title">🌍 ผลลัพธ์การค้นหา ({searchResults.length})</h4>
+          <h4 className="section-title">ผลลัพธ์การค้นหา ({searchResults.length})</h4>
           <ul className="list-group mb-4 class-list">
             {searchResults.map(cls => renderClassItem(cls, true, false))}
           </ul>
         </>
       )}
 
-      <h4 className="section-title">✅ ห้องเรียนที่คุณเข้าร่วมแล้ว ({joinedClasses.length})</h4>
+      <h4 className="section-title">ห้องเรียนที่คุณเข้าร่วมแล้ว ({joinedClasses.length})</h4>
       <ul className="list-group mb-4 class-list">
         {joinedClasses.length > 0
           ? joinedClasses.map(cls => renderClassItem(cls, true, true))
           : <li className="list-group-item text-muted text-center">ไม่มีห้องที่เข้าร่วม</li>}
       </ul>
 
-      <h4 className="section-title">⏳ ห้องเรียนที่รออนุมัติ / ยังไม่ได้เข้าร่วม</h4>
+      <h4 className="section-title">ห้องเรียนที่รออนุมัติ / ยังไม่ได้เข้าร่วม</h4>
       <ul className="list-group mb-4 class-list">
         {notJoinedClasses.length > 0
           ? notJoinedClasses.map(cls => renderClassItem(cls, true, true))

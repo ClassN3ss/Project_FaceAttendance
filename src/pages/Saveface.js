@@ -11,7 +11,7 @@ const Saveface = () => {
   const navigate = useNavigate();
   const { user, login } = useAuth();
 
-  const [message, setMessage] = useState("📷 หันหน้าตรง แล้วกด 'บันทึกใบหน้า'");
+  const [message, setMessage] = useState("! หันหน้าตรง แล้วกด 'บันทึกใบหน้า'");
   const [loading, setLoading] = useState(false);
 
   const stopCameraInstant = () => {
@@ -32,7 +32,7 @@ const Saveface = () => {
         videoRef.current.srcObject = stream;
         videoRef.current.onloadedmetadata = () => {
           videoRef.current.play().catch((err) => {
-            console.warn("🎥 play() error:", err);
+            console.warn("play() error:", err);
           });
         };
       }
@@ -43,13 +43,13 @@ const Saveface = () => {
 
   const loadModels = useCallback(async () => {
     try {
-      setMessage("🔄 กำลังโหลดโมเดล...");
+      setMessage("กำลังโหลดโมเดล...");
       await Promise.all([
         faceapi.nets.ssdMobilenetv1.loadFromUri("/models"),
         faceapi.nets.faceLandmark68Net.loadFromUri("/models"),
         faceapi.nets.faceRecognitionNet.loadFromUri("/models"),
       ]);
-      setMessage("📷 พร้อมแล้ว! หันหน้าตรง แล้วกดปุ่ม");
+      setMessage("พร้อมแล้ว! หันหน้าตรง แล้วกดปุ่ม");
       await startCamera();
     } catch {
       setMessage("❌ โหลดโมเดลไม่สำเร็จ");
@@ -66,7 +66,7 @@ const Saveface = () => {
 
   const captureFace = async () => {
     setLoading(true);
-    setMessage("🔎 กำลังตรวจจับใบหน้า...");
+    setMessage("กำลังตรวจจับใบหน้า...");
 
     const detections = await faceapi
       .detectAllFaces(videoRef.current, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 }))
@@ -84,7 +84,7 @@ const Saveface = () => {
 
     if (!token) {
       stopCameraInstant();
-      alert("⚠️ กรุณาเข้าสู่ระบบใหม่");
+      alert("! กรุณาเข้าสู่ระบบใหม่");
       sessionStorage.clear();
       return navigate("/login");
     }
@@ -116,7 +116,7 @@ const Saveface = () => {
 
   return (
     <div className="container text-cente">
-      <h2>📸 บันทึกใบหน้า</h2>
+      <h2>บันทึกใบหน้า</h2>
       <p>{message}</p>
 
       <div className="d-flex justify-content-center my-3">
@@ -134,7 +134,7 @@ const Saveface = () => {
       <div className="d-flex justify-content-center gap-2">
         <button className="btn btn-success" onClick={captureFace} disabled={loading}>
           {loading && <span className="spinner-border spinner-border-sm" role="status" />}
-          {loading ? "กำลังบันทึก..." : "📥 บันทึกใบหน้า"}
+          {loading ? "กำลังบันทึก..." : "บันทึกใบหน้า"}
         </button>
       </div>
     </div>

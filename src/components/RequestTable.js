@@ -36,7 +36,7 @@ export default function RequestTable() {
 
   return (
     <div>
-      <h5>📥 คำร้องขอเข้าเรียน</h5>
+      <h5>คำร้องขอเข้าเรียน</h5>
       <table className="table table-bordered table-sm">
         <thead>
           <tr><th>ชื่อ</th><th>วิชา</th><th>ตอน</th><th>จัดการ</th></tr>

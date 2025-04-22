@@ -7,7 +7,7 @@ export default function CSVUploader() {
   const handleFileChange = (e) => setFile(e.target.files[0]);
 
   const handleUpload = async () => {
-    if (!file) return alert('📂 กรุณาเลือกไฟล์');
+    if (!file) return alert('กรุณาเลือกไฟล์');
 
     const formData = new FormData();
     formData.append('csv', file);

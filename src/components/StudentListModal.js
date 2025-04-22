@@ -27,7 +27,7 @@ export default function StudentListModal({ show, onClose, students = [], classId
   return (
     <Modal show={show} onHide={onClose} centered size="lg">
       <Modal.Header closeButton>
-        <Modal.Title>📋 รายชื่อนักศึกษา ({students.length} คน)</Modal.Title>
+        <Modal.Title> รายชื่อนักศึกษา ({students.length} คน)</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <ul className="list-group">
@@ -40,11 +40,11 @@ export default function StudentListModal({ show, onClose, students = [], classId
                 <div><strong>{s.studentId || s.username}</strong> - {s.fullName}</div>
                 {stat ? (
                   <div className="mt-1 small text-muted-list">
-                    ✔️ มาเรียน: {stat.present} ครั้ง&nbsp;&nbsp;
+                     มาเรียน: {stat.present} ครั้ง&nbsp;&nbsp;
                   </div>
                 ) : (
                   <div className="mt-1 small text-muted-list">
-                    ✔️ มาเรียน: 0 ครั้ง&nbsp;&nbsp;
+                     มาเรียน: 0 ครั้ง&nbsp;&nbsp;
                   </div>
                 )}
               </li>

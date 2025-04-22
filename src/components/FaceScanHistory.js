@@ -25,7 +25,7 @@ export default function FaceScanHistory() {
 
   return (
     <div>
-      <h5>📊 ประวัติการสแกนใบหน้า</h5>
+      <h5>ประวัติการสแกนใบหน้า</h5>
       <table className="table table-striped table-sm">
         <thead>
           <tr>
@@ -64,7 +64,7 @@ export default function FaceScanHistory() {
           disabled={page === 1}
           onClick={() => setPage(page - 1)}
         >
-          ⬅️ ย้อนกลับ
+         ย้อนกลับ
         </button>
 
         <span className="page-indicator">
@@ -76,7 +76,7 @@ export default function FaceScanHistory() {
           disabled={page === totalPages}
           onClick={() => setPage(page + 1)}
         >
-          หน้าถัดไป ➡️
+          หน้าถัดไป 
         </button>
       </div>
     </div>

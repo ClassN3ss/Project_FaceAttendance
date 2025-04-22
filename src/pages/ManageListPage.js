@@ -8,7 +8,7 @@ function ClassListModal({ show, onHide, classes }) {
   return (
     <Modal show={show} onHide={onHide} centered>
       <Modal.Header closeButton>
-        <Modal.Title>📚 รายชื่อคลาส</Modal.Title>
+        <Modal.Title>รายชื่อคลาส</Modal.Title>
       </Modal.Header>
       <Modal.Body>
         {classes.length === 0 ? <p className="text-muted">ไม่มีคลาส</p> : (
@@ -63,7 +63,7 @@ export default function ManageListPage() {
 
     try {
       await API.delete(`/users/${user._id}`);
-      alert('🗑️ ลบเรียบร้อย');
+      alert('ลบเรียบร้อย');
       fetchUsers();
     } catch (err) {
       console.error('❌ ลบผู้ใช้ล้มเหลว:', err);
@@ -80,10 +80,10 @@ export default function ManageListPage() {
       <Card.Header>
         <strong>
           {type === 'admin'
-            ? '🛡️ ผู้ดูแลระบบทั้งหมด'
+            ? 'ผู้ดูแลระบบทั้งหมด'
             : type === 'teacher'
-            ? '👨‍🏫 อาจารย์ทั้งหมด'
-            : '👨‍🎓 นักศึกษาทั้งหมด'} ({users.length} คน)
+            ? ' อาจารย์ทั้งหมด'
+            : 'นักศึกษาทั้งหมด'} ({users.length} คน)
         </strong>
       </Card.Header>
       <Card.Body>
@@ -110,8 +110,10 @@ export default function ManageListPage() {
                     </Button>
                   </td>
                   <td>
-                    <Button variant="warning" size="sm" className="me-2" onClick={() => handleEdit(user)}>📝 แก้ไข</Button>
-                    <Button variant="danger" size="sm" onClick={() => handleDelete(user)}>🗑️ ลบ</Button>
+                    <div className="d-flex flex-column">
+                      <Button variant="warning" size="sm" className="mb-2 w-100" onClick={() => handleEdit(user)}>แก้ไข</Button>
+                      <Button variant="danger" size="sm" className="w-100" onClick={() => handleDelete(user)}>ลบ</Button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -124,7 +126,7 @@ export default function ManageListPage() {
 
   return (
     <div className="container">
-      <h4 className="mb-4">📋 จัดการรายชื่อ</h4>
+      <h4 className="mb-4">จัดการรายชื่อ</h4>
 
       {loading && <Spinner animation="border" variant="primary" />}
       {error && <Alert variant="danger">{error}</Alert>}

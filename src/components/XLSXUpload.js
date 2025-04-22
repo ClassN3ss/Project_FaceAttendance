@@ -26,7 +26,7 @@ export default function XLSXUpload() {
 
   return (
     <div className="my-3">
-      <label>📤 Upload Excel (xlsx): </label>
+      <label>Upload Excel (xlsx): </label>
       <input type="file" accept=".xlsx" onChange={e => setFile(e.target.files[0])} className="form-control my-2" />
       <button className="btn btn-success" onClick={handleUpload}>Upload XLSX</button>
     </div>

@@ -11,7 +11,7 @@ const SavefaceTeacher = () => {
   const navigate = useNavigate();
   const { user, login } = useAuth();
 
-  const [message, setMessage] = useState("📷 หันหน้าตรง แล้วกด 'บันทึกใบหน้า'");
+  const [message, setMessage] = useState("! หันหน้าตรง แล้วกด 'บันทึกใบหน้า'");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -35,7 +35,7 @@ const SavefaceTeacher = () => {
         videoRef.current.srcObject = stream;
         videoRef.current.onloadedmetadata = () => {
           videoRef.current.play().catch(err => {
-            console.warn("🔁 play() interrupted:", err);
+            console.warn("play() interrupted:", err);
           });
         };
       }
@@ -47,13 +47,13 @@ const SavefaceTeacher = () => {
 
   const loadModels = useCallback(async () => {
     try {
-      setMessage("🔄 กำลังโหลดโมเดล...");
+      setMessage("กำลังโหลดโมเดล...");
       await Promise.all([
         faceapi.nets.ssdMobilenetv1.loadFromUri("/models"),
         faceapi.nets.faceLandmark68Net.loadFromUri("/models"),
         faceapi.nets.faceRecognitionNet.loadFromUri("/models"),
       ]);
-      setMessage("📷 พร้อมแล้ว! หันหน้าตรง แล้วกดปุ่ม");
+      setMessage("พร้อมแล้ว! หันหน้าตรง แล้วกดปุ่ม");
       startCamera();
     } catch (err) {
       console.error("❌ โหลดโมเดลล้มเหลว:", err);
@@ -69,7 +69,7 @@ const SavefaceTeacher = () => {
 
   const captureFace = async () => {
     setLoading(true);
-    setMessage("🔎 กำลังตรวจจับใบหน้า...");
+    setMessage("กำลังตรวจจับใบหน้า...");
 
     const detections = await faceapi
       .detectAllFaces(videoRef.current, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 }))
@@ -77,7 +77,7 @@ const SavefaceTeacher = () => {
       .withFaceDescriptors();
 
     if (!detections.length) {
-      setMessage("❌ ไม่พบใบหน้า ลองใหม่อีกครั้ง");
+      setMessage("ไม่พบใบหน้า ลองใหม่อีกครั้ง");
       setLoading(false);
       return;
     }
@@ -87,7 +87,7 @@ const SavefaceTeacher = () => {
 
     if (!token) {
       stopCamera();
-      alert("⚠️ กรุณา login ใหม่อีกครั้ง");
+      alert("! กรุณา login ใหม่อีกครั้ง");
       sessionStorage.clear();
       navigate("/login");
       return;
@@ -122,7 +122,7 @@ const SavefaceTeacher = () => {
 
   return (
     <div className="container text-center">
-      <h2>📸 บันทึกใบหน้า (อาจารย์)</h2>
+      <h2>บันทึกใบหน้า (อาจารย์)</h2>
       <p>{message}</p>
 
       <div className="d-flex justify-content-center my-3">
@@ -139,13 +139,13 @@ const SavefaceTeacher = () => {
 
       <div className="d-flex justify-content-center gap-2">
         <button className="btn btn-success" onClick={captureFace} disabled={loading}>
-          {loading ? "กำลังบันทึก..." : "📥 บันทึกใบหน้า"}
+          {loading ? "กำลังบันทึก..." : "บันทึกใบหน้า"}
         </button>
         <button className="btn btn-secondary" onClick={() => {
           stopCamera();
           navigate(-1);
         }}>
-          🔙 กลับ
+          กลับ
         </button>
       </div>
     </div>

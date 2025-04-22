@@ -65,11 +65,11 @@ const ClassHistoryDetail = () => {
 
   return (
     <div className="container">
-      <h3>📜 รายชื่อการเช็คชื่อ</h3>
+      <h3>รายชื่อการเช็คชื่อ</h3>
 
       <div className="row mb-3">
         <div className="col-md-4">
-          <label>📅 เลือกวันที่</label>
+          <label>เลือกวันที่</label>
           <input
             type="date"
             className="form-control"
@@ -80,9 +80,9 @@ const ClassHistoryDetail = () => {
       </div>
 
       {loading ? (
-        <p>⏳ กำลังโหลด...</p>
+        <p>กำลังโหลด...</p>
       ) : Array.isArray(filtered) && filtered.length === 0 ? (
-        <p className="text-muted">❗ ยังไม่มีการเช็คชื่อ</p>
+        <p className="text-muted">! ยังไม่มีการเช็คชื่อ</p>
       ) : (
         <>
           <table className="table table-bordered mt-3">
@@ -126,7 +126,7 @@ const ClassHistoryDetail = () => {
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage(currentPage - 1)}
               >
-                ⬅️ ย้อนกลับ
+                 ย้อนกลับ
               </button>
 
               <span className="page-indicator">
@@ -138,7 +138,7 @@ const ClassHistoryDetail = () => {
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage(currentPage + 1)}
               >
-                หน้าถัดไป ➡️
+                หน้าถัดไป
               </button>
             </div>
           )}
@@ -147,7 +147,7 @@ const ClassHistoryDetail = () => {
 
       <div className="d-flex justify-content-end mt-4">
         <button className="btn btn-secondary" onClick={() => navigate(-1)}>
-          🔙 กลับ
+           กลับ
         </button>
       </div>
     </div>

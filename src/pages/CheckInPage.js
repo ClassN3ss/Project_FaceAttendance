@@ -104,26 +104,26 @@ const CheckInPage = () => {
 
   return (
     <div className="container checkin-container">
-      <h3>🧑‍🏫 เช็คชื่อเข้าเรียน</h3>
+      <h3>เช็คชื่อเข้าเรียน</h3>
 
       {!session ? (
         <div className="alert alert-warning">
-          ⏳ ขณะนี้ยังไม่มี session เปิดอยู่ กรุณารออาจารย์
+           ขณะนี้ยังไม่มี session เปิดอยู่ กรุณารออาจารย์
         </div>
       ) : (
         <div className="text-center mt-4">
           <p>
-            🗓️ วันที่: {new Date(session.openAt).toLocaleDateString()} <br />
-            🕐 เปิด: {new Date(session.openAt).toLocaleTimeString()} - ปิด:{" "}
+             วันที่: {new Date(session.openAt).toLocaleDateString()} <br />
+             เปิด: {new Date(session.openAt).toLocaleTimeString()} - ปิด:{" "}
             {new Date(session.closeAt).toLocaleTimeString()}
           </p>
           <button className="btn btn-primary btn-lg" onClick={goToScanFace}>
-            📸 ไปสแกนใบหน้าเพื่อลงชื่อ
+             ไปสแกนใบหน้าเพื่อลงชื่อ
           </button>
         </div>
       )}
 
-      <h4 className="mt-5">📜 ประวัติการเช็คชื่อวิชานี้</h4>
+      <h4 className="mt-5">ประวัติการเช็คชื่อวิชานี้</h4>
       <table className="table table-bordered mt-3">
         <thead>
           <tr>
@@ -165,7 +165,7 @@ const CheckInPage = () => {
           ) : (
             <tr>
               <td colSpan="3" className="text-center text-muted">
-                ❗ ยังไม่มีประวัติในวิชานี้
+                ! ยังไม่มีประวัติในวิชานี้
               </td>
             </tr>
           )}
@@ -179,7 +179,7 @@ const CheckInPage = () => {
             disabled={currentPage === 1}
             onClick={() => setCurrentPage(currentPage - 1)}
           >
-            ⬅️ ย้อนกลับ
+             ย้อนกลับ
           </button>
 
           <span className="page-indicator">
@@ -191,13 +191,13 @@ const CheckInPage = () => {
             disabled={currentPage === totalPages}
             onClick={() => setCurrentPage(currentPage + 1)}
           >
-            หน้าถัดไป ➡️
+            หน้าถัดไป
           </button>
         </div>
       )}
       <div className="d-flex justify-content-end mt-4 mb-5">
         <button className="btn btn-sm btn-success" onClick={() => navigate("/student-dashboard")}>
-          🔙 กลับ
+           กลับ
         </button>
       </div>
     </div>

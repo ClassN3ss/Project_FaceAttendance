@@ -11,7 +11,7 @@ const VerifyfaceTeacher = () => {
   const navigate = useNavigate();
   const { classId } = useParams();
 
-  const [message, setMessage] = useState("🔍 หันหน้าตรง แล้วกด 'ยืนยันใบหน้า'");
+  const [message, setMessage] = useState("หันหน้าตรง แล้วกด 'ยืนยันใบหน้า'");
   const [loading, setLoading] = useState(false);
   const [videoReady, setVideoReady] = useState(false);
 
@@ -37,13 +37,13 @@ const VerifyfaceTeacher = () => {
 
   const loadModels = useCallback(async () => {
     try {
-      setMessage("🔄 กำลังโหลดโมเดล...");
+      setMessage("กำลังโหลดโมเดล...");
       await Promise.all([
         faceapi.nets.ssdMobilenetv1.loadFromUri("/models"),
         faceapi.nets.faceLandmark68Net.loadFromUri("/models"),
         faceapi.nets.faceRecognitionNet.loadFromUri("/models"),
       ]);
-      setMessage("📷 กล้องพร้อมแล้ว! หันหน้าตรง แล้วกดปุ่ม");
+      setMessage("กล้องพร้อมแล้ว! หันหน้าตรง แล้วกดปุ่ม");
       await startCamera();
     } catch (error) {
       console.error("❌ โหลดโมเดลล้มเหลว:", error);
@@ -75,11 +75,11 @@ const VerifyfaceTeacher = () => {
 
   const scanFace = async () => {
     if (!videoRef.current || !videoReady) {
-      return setMessage("📷 กล้องยังไม่พร้อม");
+      return setMessage("กล้องยังไม่พร้อม");
     }
 
     setLoading(true);
-    setMessage("🔎 กำลังตรวจสอบใบหน้า...");
+    setMessage("กำลังตรวจสอบใบหน้า...");
 
     try {
       const detections = await faceapi
@@ -142,7 +142,7 @@ const VerifyfaceTeacher = () => {
 
   return (
     <div className="container text-center">
-      <h2>👨‍🏫 ยืนยันใบหน้าอาจารย์</h2>
+      <h2>ยืนยันใบหน้าอาจารย์</h2>
       <p>{message}</p>
 
       <div className="d-flex justify-content-center my-3">
@@ -169,7 +169,7 @@ const VerifyfaceTeacher = () => {
             navigate(-1);
           }}
         >
-          🔙 กลับ
+         กลับ
         </button>
       </div>
     </div>

@@ -91,11 +91,11 @@ const ClassHistoryList = () => {
 
   return (
     <div className="container">
-      <h3>📘 รายชื่อการเช็คชื่อ</h3>
+      <h3>รายชื่อการเช็คชื่อ</h3>
 
       <div className="row mb-3">
         <div className="col-md-4">
-          <label>📚 เลือกรหัสวิชา</label>
+          <label>เลือกรหัสวิชา</label>
           <select
             className="form-select"
             value={selectedCourse}
@@ -115,7 +115,7 @@ const ClassHistoryList = () => {
         </div>
 
         <div className="col-md-4">
-          <label>🧾 เลือกตอนเรียน</label>
+          <label>เลือกตอนเรียน</label>
           <select
             className="form-select"
             value={selectedSection}
@@ -132,7 +132,7 @@ const ClassHistoryList = () => {
         </div>
 
         <div className="col-md-4">
-          <label>📅 เลือกวันที่</label>
+          <label>เลือกวันที่</label>
           <input
             type="date"
             className="form-control"
@@ -143,9 +143,9 @@ const ClassHistoryList = () => {
       </div>
 
       {loading ? (
-        <p>⏳ กำลังโหลด...</p>
+        <p>กำลังโหลด...</p>
       ) : filtered.length === 0 ? (
-        <p className="text-muted">❗ ไม่พบข้อมูล</p>
+        <p className="text-muted">! ไม่พบข้อมูล</p>
       ) : (
         <>
           <table className="table table-bordered">
@@ -199,7 +199,7 @@ const ClassHistoryList = () => {
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage(currentPage - 1)}
               >
-                ⬅️ ย้อนกลับ
+                 ย้อนกลับ
               </button>
 
               <span className="page-indicator">
@@ -211,7 +211,7 @@ const ClassHistoryList = () => {
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage(currentPage + 1)}
               >
-                หน้าถัดไป ➡️
+                หน้าถัดไป
               </button>
             </div>
           )}

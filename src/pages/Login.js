@@ -74,7 +74,7 @@ const Login = () => {
             required
           />
           <button type="submit" className="w-100" disabled={loading}>
-            {loading ? "🔄 Signing in..." : "🔐 Sign In"}
+            {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
         

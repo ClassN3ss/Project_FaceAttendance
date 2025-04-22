@@ -33,7 +33,7 @@ const NewRegister = () => {
     setError("");
 
     if (!isValidId) {
-      setError("! รหัสนักศึกษาต้องอยู่ในรูปแบบ xx-xxxxxx-xxxx-x");
+      setError("! รหัสนักศึกษาต้องอยู่ในรูปแบบ 6x-0406xx-xxxx-x");
       return;
     }
 
@@ -102,7 +102,7 @@ const NewRegister = () => {
               disabled={loading}
               required
             />
-            <div className="newregister-note">* รูปแบบต้องเป็น xx-xxxxxx-xxxx-x</div>
+            <div className="newregister-note">* รูปแบบต้องเป็น 6x-0406xx-xxxx-x</div>
 
             <label className="form-label mt-3">ชื่อ-นามสกุล</label>
             <input

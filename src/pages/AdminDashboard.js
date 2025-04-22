@@ -52,14 +52,14 @@ export default function AdminDashboard() {
 
   return (
     <div className="container">
-      <h4>👑 Admin Dashboard</h4>
+      <h4> Admin Dashboard</h4>
 
       <ClassCreateModal onCreated={handleCreated} />
 
       <input
         type="text"
         className="form-control my-3"
-        placeholder="🔍 ค้นหาชื่อ, วิชา, อาจารย์..."
+        placeholder="ค้นหาชื่อ, วิชา, อาจารย์..."
         value={searchTerm}
         onChange={e => setSearchTerm(e.target.value)}
       />
