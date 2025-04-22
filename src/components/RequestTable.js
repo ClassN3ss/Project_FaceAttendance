@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import API from "../services/api"; // ✅ ใช้ API helper
+import API from "../services/api";
 import "../styles/admin.css";
 
 export default function RequestTable() {
@@ -45,8 +45,8 @@ export default function RequestTable() {
           {requests.map(req => (
             <tr key={req._id}>
               <td>{req.student?.fullName}</td>
-              <td>{req.course?.courseName}</td>
-              <td>{req.course?.section}</td>
+              <td>{req.classId?.courseName}</td>
+              <td>{req.classId?.section}</td>
               <td>
                 <button onClick={() => handleApprove(req._id, 'approved')} className="btn btn-success btn-sm">✅</button>
                 <button onClick={() => handleReject(req._id, 'rejected')} className="btn btn-danger btn-sm ms-1">❌</button>
