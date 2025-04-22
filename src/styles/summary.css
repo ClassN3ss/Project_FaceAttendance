@@ -32,3 +32,18 @@ body {
   text-align: center;
   margin-top: 10px;
 }
+
+.btn-outline-success {
+  background-color: #fad1d1;
+  color: #065f46;
+  font-weight: 500;
+  border-radius: 12px;
+  padding: 0.6rem 1.2rem;
+  transition: all 0.2s ease;
+  border: 3px solid rgb(255, 0, 0);
+}
+
+.btn-outline-success:hover {
+  background-color: #064e3b;
+  color: #bbf7d0;
+}

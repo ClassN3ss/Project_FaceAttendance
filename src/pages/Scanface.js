@@ -117,7 +117,7 @@ const Scanface = () => {
   const handleNormalCheckin = async (payload, token) => {
     try {
       console.log("📤 ส่งเช็คชื่อ payload:", payload);
-      const res = await API.post("/attendance/checkin", payload, {
+      await API.post("/attendance/checkin", payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

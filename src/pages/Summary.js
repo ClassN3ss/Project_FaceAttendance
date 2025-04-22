@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import API from '../services/api';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../styles/summary.css";
 
@@ -11,7 +13,6 @@ const Summary = () => {
   const [stats, setStats] = useState({});
   const token = sessionStorage.getItem("token");
 
-  // โหลดคลาสที่อาจารย์คนนี้สอนเท่านั้น
   useEffect(() => {
     const fetchMyClasses = async () => {
       try {
@@ -40,7 +41,6 @@ const Summary = () => {
       label: `ตอน ${c.section}`,
     }));
 
-  // ✅ โหลดนักศึกษาของ section ที่เลือก (จาก /classes/:id)
   useEffect(() => {
     if (!selectedSectionId) return;
 
@@ -49,7 +49,6 @@ const Summary = () => {
         const res = await API.get(`/classes/${selectedSectionId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-
         setStudents(res.data?.students || []);
       } catch (err) {
         console.error("❌ โหลดรายชื่อนักศึกษาไม่สำเร็จ:", err);
@@ -60,7 +59,6 @@ const Summary = () => {
     fetchStudents();
   }, [selectedSectionId, token]);
 
-  // ✅ โหลดข้อมูลจำนวนครั้งมาเรียน
   useEffect(() => {
     if (!selectedSectionId || students.length === 0) return;
 
@@ -69,7 +67,6 @@ const Summary = () => {
         const res = await API.get(`/attendance/class/${selectedSectionId}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-
         setStats(res.data || {});
       } catch (err) {
         console.error("❌ โหลดข้อมูลเช็คชื่อไม่สำเร็จ:", err);
@@ -80,12 +77,37 @@ const Summary = () => {
     fetchStats();
   }, [students, selectedSectionId, token]);
 
+  const exportToExcel = () => {
+    const data = students.map((s, idx) => {
+      const sid = String(s.studentId || s.username || "").trim();
+      const stat = stats[sid];
+      const present = stat?.present || 0;
+      return {
+        ลำดับ: idx + 1,
+        เลขประจำตัวนักศึกษา: sid,
+        ชื่อ: s.fullName,
+        คะแนน: present
+      };
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(data, {
+      header: ["ลำดับ", "เลขประจำตัวนักศึกษา", "ชื่อ", "คะแนน"]
+    });
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "รายชื่อนักศึกษา");
+
+    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+    const fileName = `รายชื่อนักศึกษา_${selectedCourse}_ตอน${selectedSectionId}.xlsx`;
+    saveAs(new Blob([excelBuffer], { type: "application/octet-stream" }), fileName);
+  };
+
   return (
     <div className="container">
       <h2>📚 รายชื่อนักศึกษาในวิชาที่สอน</h2>
 
-      <div className="row mb-3">
-        <div className="col-md-6">
+      <div className="row mb-3 align-items-end">
+        <div className="col-md-5">
           <label>📘 เลือกรหัสวิชา</label>
           <select
             className="form-select"
@@ -106,7 +128,7 @@ const Summary = () => {
           </select>
         </div>
 
-        <div className="col-md-6">
+        <div className="col-md-5">
           <label>🧾 เลือกตอนเรียน</label>
           <select
             className="form-select"
@@ -121,6 +143,17 @@ const Summary = () => {
               </option>
             ))}
           </select>
+        </div>
+
+        <div className="col-md-2 text-end">
+          {selectedSectionId && students.length > 0 && (
+            <button
+              className="btn btn-outline-success w-100 mt-4"
+              onClick={exportToExcel}
+            >
+              📤 Export Excel
+            </button>
+          )}
         </div>
       </div>
 
