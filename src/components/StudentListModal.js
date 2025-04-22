@@ -32,23 +32,19 @@ export default function StudentListModal({ show, onClose, students = [], classId
       <Modal.Body>
         <ul className="list-group">
           {students.map((s, idx) => {
-            const sid = String(s.studentId || s.username || "").trim();
+            const sid = String(s.studentId || s.username || "").trim().replace(/-/g, "");
             const stat = stats[sid];
 
             return (
               <li key={idx} className="list-group-item">
-                <div><strong>{sid}</strong> - {s.fullName}</div>
+                <div><strong>{s.studentId || s.username}</strong> - {s.fullName}</div>
                 {stat ? (
                   <div className="mt-1 small text-muted-list">
                     ✔️ มาเรียน: {stat.present} ครั้ง&nbsp;&nbsp;
-                    {/* 🕒 สาย: {stat.late} ครั้ง&nbsp;&nbsp;
-                    ❌ ขาด: {stat.absent} ครั้ง */}
                   </div>
                 ) : (
                   <div className="mt-1 small text-muted-list">
                     ✔️ มาเรียน: 0 ครั้ง&nbsp;&nbsp;
-                    {/* 🕒 สาย: 0 ครั้ง&nbsp;&nbsp;
-                    ❌ ขาด: 0 ครั้ง */}
                   </div>
                 )}
               </li>
