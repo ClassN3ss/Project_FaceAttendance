@@ -5,6 +5,7 @@ import API, { getTeacherEmailByName } from '../services/api';
 export default function ClassCreateModal({ onCreated }) {
   const [modalOpen, setModalOpen] = useState(false);
   const [file, setFile] = useState(null);
+  const [fileInputKey, setFileInputKey] = useState(Date.now());
   const [email, setEmail] = useState('');
   const [emailLocked, setEmailLocked] = useState(false);
   const [preview, setPreview] = useState({ courseCode: '', courseName: '', teacherName: '', section: '' });
@@ -14,6 +15,117 @@ export default function ClassCreateModal({ onCreated }) {
 
   const cleanName = (raw) => raw.replace(/ผู้สอน/g, '').trim();
   const cleanFullName = (name) => name.replace(/[-]+/g, ' ').replace(/\s+/g, ' ').trim();
+
+  const validateImportFile = (rows) => {
+    const errors = [];
+    const studentMap = new Map();
+    const seen = new Set();
+    const students = [];
+
+    const isSectionInvalid = (section) => {
+      if (section === '0') return false;
+      if (section.startsWith('0')) return true;
+      if (/[\/\-\+]/.test(section)) return true;
+      return false;
+    };
+
+    const headerRow = rows[6];
+    if (!headerRow || !headerRow[1]?.toString().includes('เลข') || !headerRow[2]?.toString().includes('ชื่อ')) {
+      errors.push('❌ ไม่พบคอลัมน์หัวตาราง "เลข" หรือ "ชื่อ - สกุล"');
+    }
+
+    const courseRow = rows.find(r => r?.[0]?.includes('วิชา'));
+    const teacherRow = rows.find(r => r?.[5]?.includes('ผู้สอน'));
+    if (!courseRow || !teacherRow) {
+      errors.push('❌ ไม่พบข้อมูลชื่อวิชา หรือ ผู้สอน');
+      return { errors };
+    }
+
+    const courseParts = courseRow[0].split(/\s+/);
+    const courseCode = courseParts[1];
+    const fullCourseName = courseParts.slice(2).join(' ');
+    const sectionMatch = fullCourseName.match(/ตอน\s*(\d+)/);
+    const section = sectionMatch ? sectionMatch[1] : null;
+
+    if (!courseCode || !fullCourseName) {
+      errors.push('❌ ไม่พบรหัสวิชา หรือ ชื่อวิชา');
+    }
+
+    if (!sectionMatch) {
+      if (/ตอน/.test(fullCourseName)) {
+        errors.push('❌ พบคำว่า "ตอน" แต่ไม่มีเลขกำกับ');
+      }
+    } else if (isSectionInvalid(section)) {
+      errors.push(`❌ ตอนเรียนไม่ถูกต้อง: ${section}`);
+    }
+
+    const teacherName = cleanName(teacherRow[5]);
+
+    for (let i = 8; i < rows.length; i++) {
+      const row = rows[i];
+      const studentId = String(row[1] || '').trim();
+      const fullName = cleanFullName(String(row[2] || ''));
+
+      if (!studentId && !fullName) {
+        const hasMore = rows.slice(i + 1).some(r => r[1]?.toString().trim() || r[2]?.toString().trim());
+        if (hasMore) {
+          errors.push(`❌ ข้ามแถวที่ ${i + 1}`);
+          break;
+        }
+        break;
+      }
+
+      if (!studentId || !fullName) {
+        errors.push(`❌ ข้อมูลไม่ครบในแถว ${i + 1}`);
+        continue;
+      }
+
+      if (!/^\d{2}-\d{6}-\d{4}-\d$/.test(studentId)) {
+        errors.push(`❌ เลขประจำตัวไม่ถูกต้อง (${studentId}) ที่แถว ${i + 1}`);
+      }
+
+      if (!/(นาย|นางสาว|นาง)/.test(fullName)) {
+        errors.push(`❌ ไม่มีคำนำหน้าในชื่อที่แถว ${i + 1}`);
+      }
+
+      if (!/\s/.test(fullName)) {
+        errors.push(`❌ ไม่มีนามสกุลในชื่อที่แถว ${i + 1}`);
+      }
+
+      if (studentMap.has(studentId) && studentMap.get(studentId) !== fullName) {
+        errors.push(`❌ รหัส ${studentId} ชื่อไม่ตรงกัน (${studentMap.get(studentId)} → ${fullName})`);
+      }
+
+      studentMap.set(studentId, fullName);
+      if (!seen.has(studentId)) {
+        seen.add(studentId);
+        students.push({ studentId, fullName, section });
+      }
+    }
+
+    // ✅ ตรวจ "ชื่อซ้ำแต่รหัสต่างกัน"
+    const nameToIds = new Map();
+    for (const [studentId, fullName] of studentMap.entries()) {
+      if (!nameToIds.has(fullName)) nameToIds.set(fullName, new Set());
+      nameToIds.get(fullName).add(studentId);
+    }
+    for (const [fullName, ids] of nameToIds.entries()) {
+      if (ids.size > 1) {
+        errors.push(`❌ ชื่อ "${fullName}" ซ้ำในหลายรหัสนักศึกษา (${[...ids].join(', ')})`);
+      }
+    }
+
+    return {
+      errors,
+      result: {
+        courseCode,
+        courseName: fullCourseName.replace(/ตอน\s*\d+/, '').trim(),
+        teacherName,
+        section: section || '1',
+        students,
+      },
+    };
+  };
 
   const handleFileSelect = async (e) => {
     const selectedFile = e.target.files[0];
@@ -35,67 +147,22 @@ export default function ClassCreateModal({ onCreated }) {
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
       const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-      const courseRow = rows.find(r => r?.[0]?.includes('วิชา'));
-      const teacherRow = rows.find(r => r?.[5]?.includes('ผู้สอน'));
-
-      if (!courseRow || !teacherRow) {
-        alert('❌ ไม่พบข้อมูลชื่อวิชา หรือ ผู้สอนในไฟล์');
+      const { errors, result } = validateImportFile(rows);
+      if (errors.length) {
+        alert(errors.join('\n'));
         return;
       }
 
-      // ✅ เช็กว่าแถวที่ 8 ต้องมีหัว "เลข" และ "ชื่อ"
-      const headerRow = rows[6];
-      if (!headerRow || !headerRow[1]?.toString().match(/เลขประจำตัว/i) || !headerRow[2]?.toString().match(/ชื่อ - สกุล/i)) {
-        alert('❌ รูปแบบไฟล์ไม่ถูกต้อง: ไม่พบหัวคอลัมน์ที่มีคำว่า "เลข" หรือ "ชื่อ" ในแถวที่ 8');
-        return;
-      }      
-
-      const courseParts = courseRow[0].split(/\s+/);
-      const courseCode = courseParts[1] || '000000';
-      const fullCourseName = courseParts.slice(2).join(' ');
-      const sectionMatch = fullCourseName.match(/ตอน\s*(\d+)/);
-      const section = sectionMatch ? sectionMatch[1] : '1';
-      const courseName = fullCourseName.replace(/ตอน\s*\d+/, '').trim();
-      const teacherName = cleanName(teacherRow[5]);
-
-      const students = [];
-      const seen = new Set();
-
-      for (let i = 8; i < rows.length; i++) {
-        const row = rows[i];
-        const studentId = String(row[1] || '').trim();
-        const fullName = cleanFullName(String(row[2] || ''));
-
-        if (!studentId && !fullName) {
-          const hasMore = rows.slice(i + 1).some(r => (r[1]?.toString().trim() || r[2]?.toString().trim()));
-          if (hasMore) {
-            alert(`❌ พบแถวว่างก่อนจบรายชื่อ (แถวที่ ${i + 1})`);
-            return;
-          }
-          break;
-        }
-
-        if (!studentId || !fullName) {
-          alert(`❌ ข้อมูลไม่ครบในแถวที่ ${i + 1}`);
-          return;
-        }
-
-        if (seen.has(studentId)) continue;
-        seen.add(studentId);
-
-        students.push({ studentId, fullName, section });
-      }
-
-      if (students.length === 0) {
-        alert('❌ ไม่พบนักศึกษาในไฟล์');
-        return;
-      }
-
-      setPreview({ courseCode, courseName, teacherName, section });
-      setStudentsPreview(students);
+      setPreview({
+        courseCode: result.courseCode,
+        courseName: result.courseName,
+        teacherName: result.teacherName,
+        section: result.section,
+      });
+      setStudentsPreview(result.students);
       setValid(true);
 
-      const emailFromSystem = await getTeacherEmailByName(teacherName);
+      const emailFromSystem = await getTeacherEmailByName(result.teacherName);
       if (emailFromSystem && emailFromSystem.trim()) {
         setEmail(emailFromSystem.trim());
         setEmailLocked(true);
@@ -104,11 +171,22 @@ export default function ClassCreateModal({ onCreated }) {
       console.error('❌ Error reading file:', err);
       alert('❌ ไม่สามารถอ่านไฟล์ได้');
     }
+
+    setFileInputKey(Date.now()); // 👈 reset input key
   };
 
   const handleEmailChange = (e) => {
     const value = e.target.value.toLowerCase();
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const emailRegex = /^[a-z0-9._%+-]+@(gmail\.com|email\.kmutnb\.ac\.th)$/;
+    const hasThai = /[ก-๙]/.test(value);
+    const hasSpace = /\s/.test(value);
+
+    if (hasThai || hasSpace) {
+      setEmail(value);
+      setValid(false);
+      return;
+    }
+
     setEmail(value);
     setValid(file && emailRegex.test(value));
   };
@@ -150,15 +228,15 @@ export default function ClassCreateModal({ onCreated }) {
       {modalOpen && (
         <div className="card p-3">
           <input
+            key={fileInputKey}
             type="file"
             accept=".xlsx"
             className="form-control mb-2"
             onChange={handleFileSelect}
           />
-
           <input
             type="email"
-            placeholder="อีเมลอาจารย์ (เฉพาะ a-z, 0-9, @, .)"
+            placeholder="อีเมลอาจารย์ (gmail หรือ email.kmutnb.ac.th เท่านั้น)"
             className="form-control mb-2"
             value={email}
             onChange={handleEmailChange}
@@ -182,7 +260,6 @@ export default function ClassCreateModal({ onCreated }) {
                 value={filter}
                 onChange={e => setFilter(e.target.value)}
               />
-
               <div className="alert alert-info" style={{ maxHeight: 300, overflowY: 'auto' }}>
                 <strong>👨‍🎓 รายชื่อนักศึกษา ({filteredStudents.length} คน)</strong>
                 <ul className="mb-0 small">
