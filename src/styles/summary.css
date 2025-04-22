@@ -35,12 +35,15 @@ body {
 
 .btn-outline-success {
   background-color: #fad1d1;
-  color: #065f46;
+  color: #5f0606;
   font-weight: 500;
   border-radius: 12px;
-  padding: 0.6rem 1.2rem;
-  transition: all 0.2s ease;
-  border: 3px solid rgb(255, 0, 0);
+  height: 42px;
+  border: 2px solid red;
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-outline-success:hover {

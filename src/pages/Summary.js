@@ -12,6 +12,10 @@ const Summary = () => {
   const [students, setStudents] = useState([]);
   const [stats, setStats] = useState({});
   const token = sessionStorage.getItem("token");
+  const selectedClass = classList.find(c => c._id === selectedSectionId);
+  const courseCode = selectedClass?.courseCode || "000000";
+  const courseName = selectedClass?.courseName?.replace(/\s+/g, "") || "ไม่ทราบชื่อวิชา";
+  const section = selectedClass?.section || "1";
 
   useEffect(() => {
     const fetchMyClasses = async () => {
@@ -78,34 +82,79 @@ const Summary = () => {
   }, [students, selectedSectionId, token]);
 
   const exportToExcel = () => {
-    const data = students.map((s, idx) => {
-      const sid = String(s.studentId || s.username || "").trim();
-      const stat = stats[sid];
-      const present = stat?.present || 0;
-      return {
-        ลำดับ: idx + 1,
-        เลขประจำตัวนักศึกษา: sid,
-        ชื่อ: s.fullName,
-        คะแนน: present
-      };
-    });
-
-    const worksheet = XLSX.utils.json_to_sheet(data, {
-      header: ["ลำดับ", "เลขประจำตัวนักศึกษา", "ชื่อ", "คะแนน"]
-    });
-
     const workbook = XLSX.utils.book_new();
+  
+    // เตรียม header และ max row
+    const headers = [["ลำดับ", "เลขประจำตัว", "ชื่อ", "คะแนน"]];
+    const maxRows = 36;
+    const data = [];
+  
+    for (let i = 0; i < maxRows; i++) {
+      const student = students[i];
+      const sid = student ? String(student.studentId || student.username || "").trim() : "";
+      const name = student ? student.fullName : "";
+      const stat = stats[sid];
+      const present = student ? (stat?.present || 0) : "";
+      data.push([i + 1, sid, name, present]);
+    }
+  
+    const allData = [...headers, ...data];
+    const worksheet = XLSX.utils.aoa_to_sheet(allData);
+  
+    // ตั้งค่าความกว้างคอลัมน์
+    worksheet["!cols"] = [
+      { wch: 8 },  // ลำดับ
+      { wch: 22 }, // เลขประจำตัว
+      { wch: 35 }, // ชื่อ
+      { wch: 10 }  // คะแนน
+    ];
+  
+    // สร้าง style
+    const border = {
+      top: { style: "thin" },
+      bottom: { style: "thin" },
+      left: { style: "thin" },
+      right: { style: "thin" },
+    };
+  
+    const cellStyle = {
+      font: { name: "TH Sarabun New", sz: 14 },
+      alignment: { vertical: "center", horizontal: "left" },
+      border
+    };
+  
+    const headerStyle = {
+      font: { name: "TH Sarabun New", sz: 16, bold: true },
+      alignment: { vertical: "center", horizontal: "center" },
+      border
+    };
+  
+    // ใส่ style ทีละเซลล์
+    const range = XLSX.utils.decode_range(worksheet["!ref"]);
+    for (let R = range.s.r; R <= range.e.r; ++R) {
+      for (let C = range.s.c; C <= range.e.c; ++C) {
+        const cell_address = XLSX.utils.encode_cell({ r: R, c: C });
+        if (!worksheet[cell_address]) continue;
+        worksheet[cell_address].s = R === 0 ? headerStyle : cellStyle;
+      }
+    }
+  
     XLSX.utils.book_append_sheet(workbook, worksheet, "รายชื่อนักศึกษา");
-
-    const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
-    const fileName = `รายชื่อนักศึกษา_${selectedCourse}_ตอน${selectedSectionId}.xlsx`;
-    saveAs(new Blob([excelBuffer], { type: "application/octet-stream" }), fileName);
-  };
+  
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+      cellStyles: true
+    });
+  
+    const filename = `รายชื่อนักศึกษา_${courseCode}_${courseName}_ตอน${section}.xlsx`;
+    saveAs(new Blob([excelBuffer], { type: "application/octet-stream" }), filename);
+  };      
 
   return (
     <div className="container">
       <h2>📚 รายชื่อนักศึกษาในวิชาที่สอน</h2>
-
+  
       <div className="row mb-3 align-items-end">
         <div className="col-md-5">
           <label>📘 เลือกรหัสวิชา</label>
@@ -127,7 +176,7 @@ const Summary = () => {
             ))}
           </select>
         </div>
-
+  
         <div className="col-md-5">
           <label>🧾 เลือกตอนเรียน</label>
           <select
@@ -144,19 +193,19 @@ const Summary = () => {
             ))}
           </select>
         </div>
-
-        <div className="col-md-2 text-end">
+  
+        <div className="col-md-2 d-flex align-items-end">
           {selectedSectionId && students.length > 0 && (
             <button
-              className="btn btn-outline-success w-100 mt-4"
+              className="btn btn-outline-success w-100"
               onClick={exportToExcel}
             >
-              📤 Export Excel
+              Export Excel
             </button>
           )}
         </div>
       </div>
-
+  
       {selectedSectionId && students.length > 0 && (
         <>
           <h3>📋 รายชื่อนักศึกษา ({students.length} คน)</h3>
@@ -165,7 +214,7 @@ const Summary = () => {
               const sid = String(s.studentId || s.username || "").trim();
               const stat = stats[sid];
               const present = stat?.present || 0;
-
+  
               return (
                 <li key={idx} className="list-group-item">
                   <div className="d-flex justify-content-between align-items-center">
@@ -173,7 +222,7 @@ const Summary = () => {
                       <strong>{sid}</strong> - {s.fullName}
                     </div>
                     <span className="badge bg-primary fs-6">
-                      ✅ มาเรียนทั้งหมด: {present} ครั้ง
+                      มาเรียนทั้งหมด: {present} ครั้ง
                     </span>
                   </div>
                 </li>
@@ -183,7 +232,7 @@ const Summary = () => {
         </>
       )}
     </div>
-  );
+  );  
 };
 
 export default Summary;
