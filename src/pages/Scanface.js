@@ -160,7 +160,7 @@ const Scanface = () => {
       const token = sessionStorage.getItem("token");
       if (!userId) throw new Error("ไม่พบรหัสผู้ใช้ กรุณาเข้าสู่ระบบใหม่");
 
-      const res = await API.get(`/auth/get-descriptor/${userId}`, {
+      const res = await fetch(`https://backendfaceattendance-production.up.railway.app/auth/get-descriptor/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
