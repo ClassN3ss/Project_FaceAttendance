@@ -32,7 +32,7 @@ export default function StudentListModal({ show, onClose, students = [], classId
       <Modal.Body>
         <ul className="list-group">
           {students.map((s, idx) => {
-            const sid = String(s.studentId || s.username || "").trim().replace(/-/g, "");
+            const sid = String(s.studentId || s.username || "").trim();
             const stat = stats[sid];
 
             return (
