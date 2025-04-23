@@ -26,9 +26,9 @@ const StudentDashboard = () => {
     const fetchData = async () => {
       try {
         const [reqRes, approvedEnrollRes, myClassesRes] = await Promise.all([
-          API.get(`/enrollments/requests/${user._id}`),
-          API.get(`/enrolls/enrolled/${user._id}`),
-          API.get(`/classes/student/${user._id}`)
+          API.get(`/enrollments/requests/${user._id}`), //id, studentId, classId
+          API.get(`/enrolls/enrolled/${user._id}`),  //classId
+          API.get(`/classes/student/${user._id}`) //id, corseCode/courseName/section, studentId, teacherId
         ]);
 
         const pending = reqRes.data;
@@ -42,10 +42,10 @@ const StudentDashboard = () => {
         const fetchedMissingClasses = await Promise.all(
           missingIds.map(async (id) => {
             try {
-              const res = await API.get(`/classes/${id}`);
+              const res = await API.get(`/classes/${id}`);  //id, courseCode, courseName, section, teacherId
               const classData = res.data;
               if (classData.teacherId && typeof classData.teacherId === "string") {
-                const teacherRes = await API.get(`/users/${classData.teacherId}`);
+                const teacherRes = await API.get(`/users/${classData.teacherId}`); //teacherId
                 classData.teacherId = teacherRes.data;
               }
               return classData;
@@ -75,7 +75,7 @@ const StudentDashboard = () => {
   useEffect(() => {
     const delay = setTimeout(() => {
       if (searchTerm.trim().length > 1) {
-        API.get(`/search/classes?q=${searchTerm.trim()}`)
+        API.get(`/search/classes?q=${searchTerm.trim()}`) //classId, teacherId
           .then(res => setSearchResults(res.data))
           .catch(() => setSearchResults([]));
       } else {
@@ -87,7 +87,7 @@ const StudentDashboard = () => {
 
   const handleRequestJoin = async (classId) => {
     try {
-      await API.post("/enrollments", { student: user._id, classId });
+      await API.post("/enrollments", { student: user._id, classId });  //studentId, classId
       alert("✅ ส่งคำร้องแล้ว");
       const [reqRes, searchRes] = await Promise.all([
         API.get(`/enrollments/requests/${user._id}`),

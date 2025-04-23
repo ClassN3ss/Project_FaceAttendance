@@ -20,7 +20,7 @@ const Summary = () => {
   useEffect(() => {
     const fetchMyClasses = async () => {
       try {
-        const res = await API.get("/classes/teacher", {
+        const res = await API.get("/classes/teacher", { //classId
           headers: { Authorization: `Bearer ${token}` },
         });
         setClassList(res.data || []);
@@ -50,7 +50,7 @@ const Summary = () => {
 
     const fetchStudents = async () => {
       try {
-        const res = await API.get(`/classes/${selectedSectionId}`, {
+        const res = await API.get(`/classes/${selectedSectionId}`, {  //studentId
           headers: { Authorization: `Bearer ${token}` },
         });
         setStudents(res.data?.students || []);
