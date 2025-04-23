@@ -3,6 +3,7 @@ import { Button, Card, Table, Spinner, Alert, Modal } from 'react-bootstrap';
 import API from '../services/api';
 import EditUserModal from '../components/EditUserModal';
 import "../styles/admin.css";
+import "../styles/admin-responsive.css"; // ✅ เพิ่ม responsive support
 
 function ClassListModal({ show, onHide, classes }) {
   return (
@@ -11,9 +12,13 @@ function ClassListModal({ show, onHide, classes }) {
         <Modal.Title>รายชื่อคลาส</Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        {classes.length === 0 ? <p className="text-muted">ไม่มีคลาส</p> : (
+        {classes.length === 0 ? (
+          <p className="text-muted">ไม่มีคลาส</p>
+        ) : (
           <ul>
-            {classes.map((name, idx) => <li key={idx}>{name}</li>)}
+            {classes.map((name, idx) => (
+              <li key={idx}>{name}</li>
+            ))}
           </ul>
         )}
       </Modal.Body>
@@ -36,7 +41,6 @@ export default function ManageListPage() {
       setLoading(true);
       const res = await API.get('/users');
       const allUsers = res.data;
-
       setStudents(allUsers.filter(u => u.role === 'student'));
       setTeachers(allUsers.filter(u => u.role === 'teacher'));
       setAdmins(allUsers.filter(u => u.role === 'admin'));
@@ -82,7 +86,7 @@ export default function ManageListPage() {
           {type === 'admin'
             ? 'ผู้ดูแลระบบทั้งหมด'
             : type === 'teacher'
-            ? ' อาจารย์ทั้งหมด'
+            ? 'อาจารย์ทั้งหมด'
             : 'นักศึกษาทั้งหมด'} ({users.length} คน)
         </strong>
       </Card.Header>
@@ -90,35 +94,51 @@ export default function ManageListPage() {
         {users.length === 0 ? (
           <div className="text-muted">ไม่มีข้อมูล</div>
         ) : (
-          <Table striped bordered hover responsive>
-            <thead>
-              <tr>
-                <th>ชื่อ</th>
-                <th>รหัสศึกษา</th>
-                <th>คลาสที่{type === 'teacher' ? 'สอน' : type === 'student' ? 'เรียน' : 'ดูแล'}</th>
-                <th>จัดการ</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map(user => (
-                <tr key={user._id}>
-                  <td>{user.fullName}</td>
-                  <td>{user.username}</td>
-                  <td>
-                    <Button variant="info" size="sm" onClick={() => handleViewClasses(user)}>
-                      {user.classCount} คลาส
-                    </Button>
-                  </td>
-                  <td>
-                    <div className="d-flex flex-column">
-                      <Button variant="warning" size="sm" className="mb-2 w-100" onClick={() => handleEdit(user)}>แก้ไข</Button>
-                      <Button variant="danger" size="sm" className="w-100" onClick={() => handleDelete(user)}>ลบ</Button>
-                    </div>
-                  </td>
+          <div className="table-fixed-header">
+            <Table striped bordered hover responsive className="mb-0">
+              <thead>
+                <tr>
+                  <th>ชื่อ</th>
+                  <th>รหัสศึกษา</th>
+                  <th>คลาสที่{type === 'teacher' ? 'สอน' : type === 'student' ? 'เรียน' : 'ดูแล'}</th>
+                  <th>จัดการ</th>
                 </tr>
-              ))}
-            </tbody>
-          </Table>
+              </thead>
+              <tbody>
+                {users.map(user => (
+                  <tr key={user._id}>
+                    <td>{user.fullName}</td>
+                    <td>{user.username}</td>
+                    <td>
+                      <Button variant="info" size="sm" onClick={() => handleViewClasses(user)}>
+                        {user.classCount} คลาส
+                      </Button>
+                    </td>
+                    <td>
+                      <div className="d-flex flex-column gap-1">
+                        <Button
+                          variant="warning"
+                          size="sm"
+                          className="w-100"
+                          onClick={() => handleEdit(user)}
+                        >
+                          แก้ไข
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          className="w-100"
+                          onClick={() => handleDelete(user)}
+                        >
+                          ลบ
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
         )}
       </Card.Body>
     </Card>
