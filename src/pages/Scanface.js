@@ -7,14 +7,14 @@ import API from "../services/api";
 import "../styles/scanface.css";
 
 const Scanface = () => {
-  const videoRef = useRef(null); // อ้างอิงกล้องวิดีโอ
+  const videoRef = useRef(null);
   const navigate = useNavigate();
-  const { classId } = useParams();   // รับ classId จาก URL
+  const { classId } = useParams();
 
-  const [session, setSession] = useState(null);   // session ที่เปิดอยู่
+  const [session, setSession] = useState(null);
   const [message, setMessage] = useState("โปรดหันหน้าตรง แล้วกด 'เริ่มสแกนใบหน้า'");
   const [loading, setLoading] = useState(false);
-  const [videoReady, setVideoReady] = useState(false); // กล้องโหลดเสร็จหรือยัง
+  const [videoReady, setVideoReady] = useState(false);
 
   const stopCamera = () => {
     const stream = videoRef.current?.srcObject;
@@ -42,9 +42,9 @@ const Scanface = () => {
     try {
       setMessage("กำลังโหลดโมเดล...");
       await Promise.all([
-        faceapi.nets.ssdMobilenetv1.loadFromUri("/models"), // ตรวจจับใบหน้า (bounding box)
-        faceapi.nets.faceLandmark68Net.loadFromUri("/models"), // ตรวจจุด landmark (ตา, จมูก, ปาก ฯลฯ)
-        faceapi.nets.faceRecognitionNet.loadFromUri("/models"), // แปลงใบหน้าเป็นเวกเตอร์ descriptor
+        faceapi.nets.ssdMobilenetv1.loadFromUri("/models"),
+        faceapi.nets.faceLandmark68Net.loadFromUri("/models"),
+        faceapi.nets.faceRecognitionNet.loadFromUri("/models"),
       ]);
       setMessage("กล้องพร้อมแล้ว! กดปุ่มเพื่อเริ่มสแกน");
       await startCamera();
@@ -91,26 +91,22 @@ const Scanface = () => {
       );
     });
 
-  // Haversine Formula
-  // ใช้คำนวณระยะทาง (เมตร) ระหว่าง 2 พิกัด (lat, lon) บนพื้นผิวโลก
-  // คำนวณจากรัศมีโลก (R) = 6,371,000 เมตร
-  // ผลลัพธ์คือระยะทางระหว่างตำแหน่งของนักศึกษาและอาจารย์
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371e3; // รัศมีของโลก (เมตร)
-    const toRad = (v) => (v * Math.PI) / 180; // แปลงองศาเป็นเรเดียน
-    const dLat = toRad(lat2 - lat1); //ความต่างละติจูด (เรเดียน)
-    const dLon = toRad(lon2 - lon1); //ความต่างลองจิจูด (เรเดียน)
+    const R = 6371e3;
+    const toRad = (v) => (v * Math.PI) / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
     const a =
       Math.sin(dLat / 2) ** 2 +
       Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); //ระยะทางเป็นเมตร
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   };
 
   const reverseGeocode = async (lat, lon) => {
     try {
       const res = await fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
-      ); //ซึ่งใช้ API จาก OpenStreetMap (Nominatim)
+      );
       const data = await res.json();
       return data.display_name || "ตำแหน่งที่ไม่รู้จัก";
     } catch {
@@ -144,42 +140,42 @@ const Scanface = () => {
   const scanFace = async () => {
     if (!videoReady) return setMessage("รอกล้องโหลดให้เสร็จก่อน...");
     if (!session) return setMessage("❌ ไม่พบ session ที่เชื่อมกับห้องนี้");
-  
+
     setLoading(true);
     setMessage("กำลังตรวจจับใบหน้า...");
-  
+
     try {
       const detections = await faceapi
         .detectAllFaces(videoRef.current, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 }))
         .withFaceLandmarks()
         .withFaceDescriptors();
-  
+
       if (!detections.length) {
         setMessage("❌ ไม่พบใบหน้า กรุณาลองใหม่");
         setLoading(false);
         return;
       }
-  
-      const token = sessionStorage.getItem("token");
+
       const userId = sessionStorage.getItem("userId");
-      if (!userId) throw new Error("❌ ไม่พบข้อมูลผู้ใช้ กรุณาเข้าสู่ระบบใหม่");
-  
+      const token = sessionStorage.getItem("token");
+      if (!userId) throw new Error("ไม่พบรหัสผู้ใช้ กรุณาเข้าสู่ระบบใหม่");
+
       const res = await API.get(`/auth/get-descriptor/${userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-  
+
       const savedDescriptor = new Float32Array(res.data.descriptor);
       const newDescriptor = detections[0].descriptor;
       const distance = faceapi.euclideanDistance(newDescriptor, savedDescriptor);
-  
+
       if (distance > 0.5) {
         setMessage("❌ ใบหน้าไม่ตรงกับบัญชีผู้ใช้");
         setLoading(false);
         return;
       }
-  
+
       const { latitude, longitude } = await getGPSLocation();
-  
+
       const payload = {
         studentId: userId,
         fullName: res.data.fullName,
@@ -188,28 +184,15 @@ const Scanface = () => {
         sessionId: session._id,
         faceDescriptor: Array.from(newDescriptor),
       };
-  
-      if (session.withTeacherFace) {
-        alert("สแกนใบหน้าอาจารย์เพื่อยืนยันตัวตนก่อนเช็คชื่อ");
-        sessionStorage.setItem("studentDescriptor", JSON.stringify(payload));
-        stopCamera();
-        navigate(`/verifyface-teacher/${classId}`, { replace: true });
-        return;
-      }
-  
-      await API.post("/attendance/checkin", payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-  
-      alert(`✅ เช็คชื่อสำเร็จ! ขอบคุณ ${payload.fullName}`);
-      stopCamera();
-      navigate("/student-dashboard");
+
+      if (session.withTeacherFace) return redirectToTeacherScan(payload);
+      await handleNormalCheckin(payload, token);
     } catch (error) {
       setMessage(error.message || "❌ เกิดข้อผิดพลาดในการเช็คชื่อ");
     } finally {
       setLoading(false);
     }
-  };  
+  };
 
   return (
     <div className="container text-center">
