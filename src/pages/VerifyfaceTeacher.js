@@ -82,7 +82,7 @@ const VerifyfaceTeacher = () => {
     setMessage("กำลังตรวจสอบใบหน้า...");
 
     try {
-      const detections = await faceapiz
+      const detections = await faceapi
         .detectAllFaces(videoRef.current, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 }))
         .withFaceLandmarks()
         .withFaceDescriptors();
