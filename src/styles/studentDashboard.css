@@ -20,6 +20,7 @@ body::before {
   mask-image: radial-gradient(circle at center, black 30%, transparent 100%);
 }
 
+
 .dashboard-container {
   max-width: 900px;
 }
@@ -110,7 +111,7 @@ body::before {
 .class-list .list-group-item .d-flex {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: center;           /* ✅ ปรับให้ปุ่มอยู่ตรงกลางฝั่งขวา */
   flex-wrap: nowrap;
   gap: 1rem;
 }
@@ -201,64 +202,4 @@ body::before {
      1px -1px 0 #000,
     -1px  1px 0 #000,
      1px  1px 0 #000;
-}
-
-/* ✅ Responsive */
-@media (max-width: 576px) {
-  .profile-card {
-    padding: 1.5rem;
-  }
-
-  .search-input {
-    font-size: 0.95rem;
-    padding: 0.8rem;
-  }
-
-  .custom-btn-primary,
-  .btn-outline-primary {
-    font-size: 0.9rem;
-    padding: 5px 12px;
-  }
-
-  .action-column {
-    min-width: 120px;
-  }
-
-  .class-list .list-group-item .custom-btn-primary {
-    width: 120px;
-  }
-}
-
-@media (min-width: 577px) and (max-width: 768px) {
-  .profile-card {
-    padding: 2rem;
-  }
-
-  .search-input {
-    font-size: 1rem;
-    padding: 0.9rem;
-  }
-
-  .custom-btn-primary,
-  .btn-outline-primary {
-    font-size: 1rem;
-  }
-}
-
-@media (min-width: 769px) and (max-width: 992px) {
-  .custom-btn-primary,
-  .btn-outline-primary {
-    font-size: 1rem;
-  }
-}
-
-@media (min-width: 993px) {
-  .custom-btn-primary,
-  .btn-outline-primary {
-    font-size: 1.05rem;
-  }
-
-  .profile-card {
-    padding: 2.5rem;
-  }
 }
