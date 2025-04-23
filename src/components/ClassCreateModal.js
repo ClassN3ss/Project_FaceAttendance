@@ -23,7 +23,7 @@ export default function ClassCreateModal({ onCreated }) {
     const students = [];
 
     const isSectionInvalid = (section) => {
-      if (section === '0') return false;
+      if (section === '0') return true;
       if (section.startsWith('0')) return true;
       if (/[\/\-\+]/.test(section)) return true;
       return false;
