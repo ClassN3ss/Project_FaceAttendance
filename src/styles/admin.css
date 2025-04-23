@@ -217,3 +217,56 @@ h5{
         font-size: 14px;
     }
 }
+
+/* 💡 ขนาดเล็กมาก เช่น โทรศัพท์แนวตั้ง */
+@media (max-width: 576px) {
+  .container {
+    padding: 16px 8px;
+  }
+
+  .card {
+    padding: 14px;
+  }
+
+  .table th, .table td {
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+
+  input[type="text"] {
+    font-size: 13px;
+  }
+
+  h1, h2, h3 {
+    font-size: 1.2rem;
+  }
+
+  .btn {
+    font-size: 12px;
+    padding: 8px 14px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 992px) {
+  .container {
+    padding: 24px 20px;
+  }
+
+  .card {
+    padding: 22px;
+  }
+
+  .table th, .table td {
+    font-size: 15px;
+    padding: 12px 16px;
+  }
+
+  input[type="text"] {
+    font-size: 15px;
+  }
+
+  .btn {
+    font-size: 14px;
+    padding: 10px 18px;
+  }
+}

@@ -56,3 +56,113 @@ h2, h4{
     0 0 18px rgba(132, 225, 188, 0.6),
     0 0 28px rgba(16, 185, 129, 0.6);
 }
+
+/* มือถือเล็กสุด (xs) */
+@media (max-width: 576px) {
+  .navbar-custom {
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+  }
+
+  .navbar-custom .navbar-brand {
+    font-size: 1.1rem;
+  }
+
+  .profile-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+
+  .profile-dropdown {
+    font-size: 0.85rem;
+    padding: 0.6rem;
+    min-width: 180px;
+  }
+
+  .logout-btn {
+    font-size: 0.85rem;
+    padding: 6px 10px;
+  }
+
+  .navbar-toggler {
+    font-size: 1.25rem;
+  }
+}
+
+/* มือถือใหญ่ / แท็บเล็ตแนวตั้ง (sm-md) */
+@media (min-width: 577px) and (max-width: 768px) {
+  .navbar-custom {
+    padding: 0.9rem 1.2rem;
+    font-size: 1rem;
+  }
+
+  .navbar-custom .navbar-brand {
+    font-size: 1.2rem;
+  }
+
+  .profile-icon {
+    width: 34px;
+    height: 34px;
+    font-size: 17px;
+  }
+
+  .profile-dropdown {
+    font-size: 0.9rem;
+    padding: 0.75rem;
+    min-width: 200px;
+  }
+
+  .logout-btn {
+    font-size: 0.9rem;
+    padding: 6px 12px;
+  }
+}
+
+/* แท็บเล็ตแนวนอน (md-lg) */
+@media (min-width: 769px) and (max-width: 992px) {
+  .navbar-custom .navbar-brand {
+    font-size: 1.2rem;
+  }
+
+  .navbar-custom .nav-link {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .profile-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+
+  .profile-dropdown {
+    font-size: 0.95rem;
+    padding: 0.75rem;
+    min-width: 220px;
+    left: 0 !important;
+    right: auto !important;
+  }
+
+  .logout-btn {
+    font-size: 0.9rem;
+    padding: 6px 12px;
+  }
+}
+
+/* จอใหญ่ (lg+) */
+@media (min-width: 993px) {
+  .navbar-custom .navbar-brand {
+    font-size: 1.4rem;
+  }
+
+  .profile-dropdown {
+    font-size: 1rem;
+    padding: 1rem;
+    min-width: 240px;
+  }
+
+  .logout-btn {
+    font-size: 1rem;
+    padding: 8px 14px;
+  }
+}
