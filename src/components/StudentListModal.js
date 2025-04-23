@@ -8,21 +8,28 @@ export default function StudentListModal({ show, onClose, students = [], classId
 
   useEffect(() => {
     if (!show || !classId || students.length === 0) return;
-
+  
     const fetchStats = async () => {
       try {
         const res = await API.get(`/attendance/class/${classId}`);
-        const summary = res.data; // ✅ เป็น object ไม่ใช่ array
-
-        setStats(summary);
+        const summary = res.data;
+  
+        const normalizedStats = {};
+        for (const key in summary) {
+          const normalizedKey = key.trim().replace(/-/g, "");
+          normalizedStats[normalizedKey] = summary[key];
+        }
+  
+        setStats(normalizedStats);
       } catch (err) {
         console.error('❌ ดึงข้อมูลเช็คชื่อไม่สำเร็จ:', err);
         setStats({});
       }
     };
-
+  
     fetchStats();
   }, [show, students, classId]);
+  
 
   return (
     <Modal show={show} onHide={onClose} centered size="lg">
@@ -32,7 +39,7 @@ export default function StudentListModal({ show, onClose, students = [], classId
       <Modal.Body>
         <ul className="list-group">
           {students.map((s, idx) => {
-            const sid = String(s.studentId || s.username || "").trim();
+            const sid = String(s.studentId || s.username || "").trim().replace(/-/g, "");
             const stat = stats[sid];
 
             return (
