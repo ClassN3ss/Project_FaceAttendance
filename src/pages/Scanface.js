@@ -150,6 +150,12 @@ const Scanface = () => {
       const verifyData = await verifyRes.json();
       if (!verifyRes.ok) throw new Error(verifyData.message || "❌ ไม่พบใบหน้าในระบบ");
 
+      if (verifyData.studentId !== sessionStorage.getItem("studentId")) {
+        setMessage("❌ ตรวจพบว่าบุคคลที่สแกนไม่ตรงกับบัญชีผู้ใช้ กรุณาติดต่อเจ้าหน้าที่");
+        setLoading(false);
+        return;
+      }
+
       const distance = calculateDistance(
         session.location.latitude,
         session.location.longitude,
