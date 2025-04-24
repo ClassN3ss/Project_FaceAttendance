@@ -1,20 +1,19 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import * as faceapi from "face-api.js";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../App.css";
 import API from "../services/api";
 import "../styles/scanface.css";
 
 const Scanface = () => {
-  const videoRef = useRef(null); // อ้างอิงกล้องวิดีโอ
+  const videoRef = useRef(null);
   const navigate = useNavigate();
-  const { classId } = useParams();   // รับ classId จาก URL
+  const { classId } = useParams();
 
-  const [session, setSession] = useState(null);   // session ที่เปิดอยู่
+  const [session, setSession] = useState(null);
   const [message, setMessage] = useState("โปรดหันหน้าตรง แล้วกด 'เริ่มสแกนใบหน้า'");
   const [loading, setLoading] = useState(false);
-  const [videoReady, setVideoReady] = useState(false); // กล้องโหลดเสร็จหรือยัง
+  const [videoReady, setVideoReady] = useState(false);
 
   const stopCamera = () => {
     const stream = videoRef.current?.srcObject;
@@ -38,30 +37,12 @@ const Scanface = () => {
     }
   };
 
-  const loadModels = useCallback(async () => {
-    try {
-      setMessage("กำลังโหลดโมเดล...");
-      await Promise.all([
-        faceapi.nets.ssdMobilenetv1.loadFromUri("/models"), // ตรวจจับใบหน้า (bounding box)
-        faceapi.nets.faceLandmark68Net.loadFromUri("/models"), // ตรวจจุด landmark (ตา, จมูก, ปาก ฯลฯ)
-        faceapi.nets.faceRecognitionNet.loadFromUri("/models"), // แปลงใบหน้าเป็นเวกเตอร์ descriptor
-      ]);
-      setMessage("กล้องพร้อมแล้ว! กดปุ่มเพื่อเริ่มสแกน");
-      await startCamera();
-    } catch {
-      setMessage("❌ โหลดโมเดลไม่สำเร็จ");
-    }
-  }, []);
-
   const fetchSession = useCallback(async () => {
     try {
       const token = sessionStorage.getItem("token");
       const res = await API.get(`/checkin-sessions/class/${classId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      console.log("[Client Now]:", new Date().toISOString());
-      console.log("[Session Time]:", res.data?.openAt, res.data?.closeAt);
       setSession(res.data);
     } catch {
       setMessage("❌ ขณะนี้ยังไม่มี session เปิดอยู่ กรุณารออาจารย์");
@@ -69,10 +50,10 @@ const Scanface = () => {
   }, [classId]);
 
   useEffect(() => {
-    loadModels();
+    startCamera();
     fetchSession();
     return () => stopCamera();
-  }, [loadModels, fetchSession]);
+  }, [fetchSession]);
 
   const getGPSLocation = () =>
     new Promise((resolve, reject) => {
@@ -91,26 +72,22 @@ const Scanface = () => {
       );
     });
 
-  // Haversine Formula
-  // ใช้คำนวณระยะทาง (เมตร) ระหว่าง 2 พิกัด (lat, lon) บนพื้นผิวโลก
-  // คำนวณจากรัศมีโลก (R) = 6,371,000 เมตร
-  // ผลลัพธ์คือระยะทางระหว่างตำแหน่งของนักศึกษาและอาจารย์
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
-    const R = 6371e3; // รัศมีของโลก (เมตร)
-    const toRad = (v) => (v * Math.PI) / 180; // แปลงองศาเป็นเรเดียน
-    const dLat = toRad(lat2 - lat1); //ความต่างละติจูด (เรเดียน)
-    const dLon = toRad(lon2 - lon1); //ความต่างลองจิจูด (เรเดียน)
+    const R = 6371e3;
+    const toRad = (v) => (v * Math.PI) / 180;
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
     const a =
       Math.sin(dLat / 2) ** 2 +
       Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
-    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); //ระยะทางเป็นเมตร
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   };
 
   const reverseGeocode = async (lat, lon) => {
     try {
       const res = await fetch(
         `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`
-      ); //ซึ่งใช้ API จาก OpenStreetMap (Nominatim)
+      );
       const data = await res.json();
       return data.display_name || "ตำแหน่งที่ไม่รู้จัก";
     } catch {
@@ -120,11 +97,9 @@ const Scanface = () => {
 
   const handleNormalCheckin = async (payload, token) => {
     try {
-      console.log("ส่งเช็คชื่อ payload:", payload);
       await API.post("/attendance/checkin", payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
       alert(`✅ เช็คชื่อสำเร็จ! ขอบคุณ ${payload.fullName}`);
       stopCamera();
       navigate("/student-dashboard");
@@ -149,70 +124,58 @@ const Scanface = () => {
     setMessage("กำลังตรวจจับใบหน้า...");
 
     try {
-      const detections = await faceapi
-        .detectAllFaces(videoRef.current, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 })) // ใช้โมเดล SSD-MobileNet และตั้งค่าความมั่นใจ
-        .withFaceLandmarks() // ตรวจหาจุดสำคัญบนใบหน้า (ตา จมูก ปาก คาง ฯลฯ)
-        .withFaceDescriptors(); // สร้างข้อมูลเวกเตอร์ 128 ค่า เพื่อใช้เปรียบเทียบตัวตนของใบหน้านั้น
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+      canvas.width = videoRef.current.videoWidth;
+      canvas.height = videoRef.current.videoHeight;
+      context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+      const imageBlob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg"));
 
-      if (!detections.length) {
-        setMessage("❌ ไม่พบใบหน้า กรุณาลองใหม่");
+      const gps = await getGPSLocation();
+      const formData = new FormData();
+      formData.append("file", imageBlob);
+      formData.append("userId", sessionStorage.getItem("studentId"));
+      formData.append("sessionId", session._id);
+      formData.append("latitude", gps.latitude);
+      formData.append("longitude", gps.longitude);
+
+      const token = sessionStorage.getItem("token");
+
+      const verifyRes = await fetch("http://127.0.0.1:5001/verify-face", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+
+      const verifyData = await verifyRes.json();
+      if (!verifyRes.ok) throw new Error(verifyData.message || "❌ ไม่พบใบหน้าในระบบ");
+
+      const distance = calculateDistance(
+        session.location.latitude,
+        session.location.longitude,
+        gps.latitude,
+        gps.longitude
+      );
+
+      if (distance > 100) {
+        const place = await reverseGeocode(gps.latitude, gps.longitude);
+        setMessage(
+          `❌ คุณอยู่นอกพื้นที่เช็คชื่อ (ห่าง ${Math.round(distance)} เมตร)\n` +
+            `* พิกัดของคุณ: ${gps.latitude.toFixed(6)}, ${gps.longitude.toFixed(6)}\n` +
+            `- สถานที่: ${place}` +
+            (session.location.name ? `\n- จุดหมายเช็คชื่อ: ${session.location.name}` : "")
+        );
         setLoading(false);
         return;
       }
 
-      const descriptorArray = Array.from(detections[0].descriptor);
-      const token = sessionStorage.getItem("token");
-      const { latitude, longitude } = await getGPSLocation(); //ดึงพิกัด
-
-      //เปรียบเทียบกับพิกัดของอาจารย์
-      if (session?.location?.latitude && session?.location?.longitude) {
-        console.log("- พิกัดอาจารย์:", session.location.latitude, session.location.longitude);
-        console.log("- พิกัดนักศึกษา:", latitude, longitude);
-        const distance = calculateDistance(
-          session.location.latitude,
-          session.location.longitude,
-          latitude,
-          longitude
-        );
-        console.log("คำนวณระยะห่าง:", distance.toFixed(2), "เมตร");
-
-        if (distance > 100) {
-          const place = await reverseGeocode(latitude, longitude); //แปลงพิกัด GPS เป็นสถานที่
-          setMessage(
-            `❌ คุณอยู่นอกพื้นที่เช็คชื่อ (ห่าง ${Math.round(distance)} เมตร)\n` +
-              `* พิกัดของคุณ: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}\n` +
-              `- สถานที่: ${place}` +
-              (session.location.name ? `\n- จุดหมายเช็คชื่อ: ${session.location.name}` : "")
-          );
-          setLoading(false);
-          return;
-        }
-      }
-
-      const findRes = await fetch(
-        "https://backendfaceattendance-production.up.railway.app/auth/upload-face",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ faceDescriptor: descriptorArray }),
-        }
-      );
-
-      //{studentId, fullName, latitude, longitude, sessionId, faceDescriptor}
-
-      const findData = await findRes.json();
-      if (!findRes.ok) throw new Error(findData.message || "❌ ไม่พบใบหน้าในระบบ");
-
       const payload = {
-        studentId: findData.studentId,
-        fullName: findData.fullName,
-        latitude,
-        longitude,
+        studentId: verifyData.studentId,
+        fullName: verifyData.fullName,
+        latitude: gps.latitude,
+        longitude: gps.longitude,
         sessionId: session._id,
-        faceDescriptor: descriptorArray,
+        faceDescriptor: verifyData.faceDescriptor,
       };
 
       if (session.withTeacherFace) return redirectToTeacherScan(payload);
