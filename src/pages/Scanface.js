@@ -144,58 +144,51 @@ const Scanface = () => {
   const scanFace = async () => {
     if (!videoReady) return setMessage("รอกล้องโหลดให้เสร็จก่อน...");
     if (!session) return setMessage("❌ ไม่พบ session ที่เชื่อมกับห้องนี้");
-  
+
     setLoading(true);
     setMessage("กำลังตรวจจับใบหน้า...");
-  
+
     try {
       const detections = await faceapi
-        .detectAllFaces(videoRef.current, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 }))
-        .withFaceLandmarks()
-        .withFaceDescriptors();
-  
+        .detectAllFaces(videoRef.current, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 })) // ใช้โมเดล SSD-MobileNet และตั้งค่าความมั่นใจ
+        .withFaceLandmarks() // ตรวจหาจุดสำคัญบนใบหน้า (ตา จมูก ปาก คาง ฯลฯ)
+        .withFaceDescriptors(); // สร้างข้อมูลเวกเตอร์ 128 ค่า เพื่อใช้เปรียบเทียบตัวตนของใบหน้านั้น
+
       if (!detections.length) {
         setMessage("❌ ไม่พบใบหน้า กรุณาลองใหม่");
         setLoading(false);
         return;
       }
-  
-      // ✅ แสดงจำนวนใบหน้าที่ตรวจเจอทั้งหมด
-      console.log("🧠 พบใบหน้าทั้งหมด:", detections.length);
-  
-      detections.forEach((det, index) => {
-        const desc = Array.from(det.descriptor);
-        console.log(`👤 ใบหน้าที่ ${index + 1} | ความยาว descriptor: ${desc.length}`);
-        console.log(`🔍 ตัวอย่าง descriptor:`, desc.slice(0, 5), "...");
-      });
-  
+
       const descriptorArray = Array.from(detections[0].descriptor);
       const token = sessionStorage.getItem("token");
-      const { latitude, longitude } = await getGPSLocation();
-  
+      const { latitude, longitude } = await getGPSLocation(); //ดึงพิกัด
+
+      //เปรียบเทียบกับพิกัดของอาจารย์
       if (session?.location?.latitude && session?.location?.longitude) {
+        console.log("- พิกัดอาจารย์:", session.location.latitude, session.location.longitude);
+        console.log("- พิกัดนักศึกษา:", latitude, longitude);
         const distance = calculateDistance(
           session.location.latitude,
           session.location.longitude,
           latitude,
           longitude
         );
-  
-        console.log("📍 ระยะห่างจากอาจารย์:", distance.toFixed(2), "เมตร");
-  
+        console.log("คำนวณระยะห่าง:", distance.toFixed(2), "เมตร");
+
         if (distance > 100) {
-          const place = await reverseGeocode(latitude, longitude);
+          const place = await reverseGeocode(latitude, longitude); //แปลงพิกัด GPS เป็นสถานที่
           setMessage(
             `❌ คุณอยู่นอกพื้นที่เช็คชื่อ (ห่าง ${Math.round(distance)} เมตร)\n` +
-            `* พิกัดของคุณ: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}\n` +
-            `- สถานที่: ${place}` +
-            (session.location.name ? `\n- จุดหมายเช็คชื่อ: ${session.location.name}` : "")
+              `* พิกัดของคุณ: ${latitude.toFixed(6)}, ${longitude.toFixed(6)}\n` +
+              `- สถานที่: ${place}` +
+              (session.location.name ? `\n- จุดหมายเช็คชื่อ: ${session.location.name}` : "")
           );
           setLoading(false);
           return;
         }
       }
-  
+
       const findRes = await fetch(
         "https://backendfaceattendance-production.up.railway.app/auth/upload-face",
         {
@@ -207,10 +200,12 @@ const Scanface = () => {
           body: JSON.stringify({ faceDescriptor: descriptorArray }),
         }
       );
-  
+
+      //{studentId, fullName, latitude, longitude, sessionId, faceDescriptor}
+
       const findData = await findRes.json();
       if (!findRes.ok) throw new Error(findData.message || "❌ ไม่พบใบหน้าในระบบ");
-  
+
       const payload = {
         studentId: findData.studentId,
         fullName: findData.fullName,
@@ -219,7 +214,7 @@ const Scanface = () => {
         sessionId: session._id,
         faceDescriptor: descriptorArray,
       };
-  
+
       if (session.withTeacherFace) return redirectToTeacherScan(payload);
       await handleNormalCheckin(payload, token);
     } catch (error) {
@@ -227,7 +222,7 @@ const Scanface = () => {
     } finally {
       setLoading(false);
     }
-  };  
+  };
 
   return (
     <div className="container text-center">
