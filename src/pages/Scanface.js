@@ -91,7 +91,7 @@ const Scanface = () => {
       const data = await res.json();
       return data.display_name || "ตำแหน่งที่ไม่รู้จัก";
     } catch {
-      return "ตำแหน่งที่ไม่รู้จัก";
+      return "ตำแหนงที่ไม่รู้จัก";
     }
   };
 
@@ -124,6 +124,7 @@ const Scanface = () => {
     setMessage("กำลังตรวจจับใบหน้า...");
 
     try {
+      // 1) ถ่ายภาพจากวิดีโอ
       const canvas = document.createElement("canvas");
       const context = canvas.getContext("2d");
       canvas.width = videoRef.current.videoWidth;
@@ -131,60 +132,89 @@ const Scanface = () => {
       context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
       const imageBlob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg"));
 
-      const gps = await getGPSLocation();
-      const formData = new FormData();
-      formData.append("file", imageBlob);
-      formData.append("userId", sessionStorage.getItem("studentId"));
-      formData.append("sessionId", session._id);
-      formData.append("latitude", gps.latitude);
-      formData.append("longitude", gps.longitude);
+      // 2) เรียก Face API (เส้นที่ 1): verify-one
+      const sid =
+        sessionStorage.getItem("studentId") ||
+        localStorage.getItem("studentId") ||
+        "";
+      const sname =
+        sessionStorage.getItem("fullName") ||
+        localStorage.getItem("fullName") ||
+        "";
 
-      const token = sessionStorage.getItem("token");
+      console.log("[Scanface] studentId =", sid, "fullName =", sname);
 
-      const verifyRes = await fetch("http://127.0.0.1:5001/verify-face", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      });
-
-      const verifyData = await verifyRes.json();
-      if (!verifyRes.ok) throw new Error(verifyData.message || "❌ ไม่พบใบหน้าในระบบ");
-
-      if (verifyData.studentId !== sessionStorage.getItem("studentId")) {
-        setMessage("❌ ตรวจพบว่าบุคคลที่สแกนไม่ตรงกับบัญชีผู้ใช้ กรุณาติดต่อเจ้าหน้าที่");
+      // กันกรณีไม่มีค่า -> แจ้งผู้ใช้ แล้วหยุด
+      if (!sid.trim()) {
+        setMessage("❌ ไม่พบรหัสนักศึกษา (studentId) ใน session — โปรดล็อกอินใหม่");
+        setLoading(false);
+        return;
+      }
+      if (!sname.trim()) {
+        setMessage("❌ ไม่พบชื่อผู้ใช้ (fullName) — โปรดล็อกอินใหม่");
         setLoading(false);
         return;
       }
 
+      const modelForm = new FormData();
+      modelForm.append("fullname", sessionStorage.getItem("fullName") || "");
+      modelForm.append("studentID", sessionStorage.getItem("studentId") || "");
+      modelForm.append("image", imageBlob);
+
+      const verifyRes = await fetch(`http://localhost:5000/api/scan-face`, {
+        method: "POST",
+        body: modelForm,
+      });
+      const verifyData = await verifyRes.json();
+
+      if (!verifyData.ok || !verifyData.match) {
+        setMessage(verifyData.message || "❌ ใบหน้าไม่ถูกต้อง กรุณาลองใหม่");
+        setLoading(false);
+        return;
+      }
+
+      // 3) ตรวจ GPS (ถ้าตั้งค่า)
+      const gps = await getGPSLocation();
       const distance = calculateDistance(
-        session.location.latitude,
-        session.location.longitude,
+        session?.location?.latitude || 0,
+        session?.location?.longitude || 0,
         gps.latitude,
         gps.longitude
       );
 
-      if (distance > 100) {
+      if (session?.location?.radiusInMeters && distance > session.location.radiusInMeters) {
         const place = await reverseGeocode(gps.latitude, gps.longitude);
         setMessage(
-          `❌ คุณอยู่นอกพื้นที่เช็คชื่อ (ห่าง ${Math.round(distance)} เมตร)\n` +
-            `* พิกัดของคุณ: ${gps.latitude.toFixed(6)}, ${gps.longitude.toFixed(6)}\n` +
-            `- สถานที่: ${place}` +
+          `❌ คุณอยู่นอกพื้นที่เช็คชื่อ (ห่าง ${Math.round(distance)} เมตร)` +
+            `\n- พิกัดของคุณ: ${gps.latitude.toFixed(6)}, ${gps.longitude.toFixed(6)}` +
+            `\n- สถานที่: ${place}` +
             (session.location.name ? `\n- จุดหมายเช็คชื่อ: ${session.location.name}` : "")
         );
         setLoading(false);
         return;
       }
 
+      // 4) เตรียม payload และเรียก Backend (เส้นที่ 2) เพื่อบันทึกเช็คชื่อ
       const payload = {
-        studentId: verifyData.studentId,
-        fullName: verifyData.fullName,
+        studentId: sid,
+        fullName: sname,
         latitude: gps.latitude,
         longitude: gps.longitude,
         sessionId: session._id,
-        faceDescriptor: verifyData.faceDescriptor,
+        locationName: session?.location?.name || null,
+        // (ออปชัน) เก็บผลเทียบเพื่อ audit
+        matchRef: {
+          distance: verifyData.distance,
+          threshold: verifyData.threshold,
+        },
       };
 
-      if (session.withTeacherFace) return redirectToTeacherScan(payload);
+      if (session.withTeacherFace) {
+        // ถ้ากำหนดให้ยืนยันใบหน้าครู คง flow เดิม
+        return redirectToTeacherScan(payload);
+      }
+
+      const token = sessionStorage.getItem("token");
       await handleNormalCheckin(payload, token);
     } catch (error) {
       setMessage(error.message || "❌ เกิดข้อผิดพลาดในการเช็คชื่อ");

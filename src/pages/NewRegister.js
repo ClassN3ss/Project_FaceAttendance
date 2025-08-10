@@ -49,7 +49,7 @@ const NewRegister = () => {
 
     setLoading(true);
     try {
-      const res = await axios.post("https://backendfaceattendance-production.up.railway.app/auth/new-register", {
+      const res = await axios.post("http://localhost:8000/auth/new-register", {
         studentId: trimmedId,
         fullName: trimmedName,
         email: trimmedEmail,

@@ -25,7 +25,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post("https://backendfaceattendance-production.up.railway.app/auth/login", {
+      const res = await axios.post("http://localhost:8000/auth/login", {
         username,
         password,
       });
@@ -33,6 +33,10 @@ const Login = () => {
       const { token, user } = res.data;
       sessionStorage.setItem("token", token);
       sessionStorage.setItem("user", JSON.stringify(user));
+
+      sessionStorage.setItem("studentId", user.studentId || "");
+      sessionStorage.setItem("fullName", user.fullName || "");
+
       login(user, token);
 
       alert("✅ Login Successful!");

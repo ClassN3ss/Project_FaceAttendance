@@ -1,142 +1,172 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import * as faceapi from "face-api.js";
 import { useAuth } from "../context/AuthContext";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "../App.css";
 import "../styles/saveface.css";
+
+const directions = [
+  { key: "front", message: "หันหน้าตรง" },
+  { key: "left", message: "หันหน้าซ้าย" },
+  { key: "right", message: "หันหน้าขวา" },
+  { key: "up", message: "เงยหน้า" },
+  { key: "down", message: "ก้มหน้า" },
+];
 
 const Saveface = () => {
   const videoRef = useRef(null);
   const navigate = useNavigate();
   const { user, login } = useAuth();
 
-  const [message, setMessage] = useState("! หันหน้าตรง แล้วกด 'บันทึกใบหน้า'");
+  const [currentStep, setCurrentStep] = useState(0);
+  const [capturedImages, setCapturedImages] = useState({});
+  const [message, setMessage] = useState("กำลังโหลดกล้อง...");
   const [loading, setLoading] = useState(false);
 
-  const stopCameraInstant = () => {
-    const video = videoRef.current;
-    const stream = video?.srcObject;
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-      video.pause();
-      video.srcObject = null;
-      video.removeAttribute("srcObject");
+  // CHANGED: helper ปิดกล้องให้สะอาด ลด AbortError ตอน unmount
+  const stopCameraInstant = (videoEl) => {
+    const v = videoEl || videoRef.current;
+    const stream = v?.srcObject;
+    if (stream) stream.getTracks().forEach((t) => t.stop());
+    if (v) {
+      v.pause?.();
+      v.srcObject = null;
     }
   };
 
-  const startCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.onloadedmetadata = () => {
-          videoRef.current.play().catch((err) => {
-            console.warn("play() error:", err);
-          });
-        };
-      }
-    } catch {
-      setMessage("❌ โปรดอนุญาตให้ใช้กล้อง");
-    }
-  };
-
-  const loadModels = useCallback(async () => {
-    try {
-      setMessage("กำลังโหลดโมเดล...");
-      await Promise.all([
-        faceapi.nets.ssdMobilenetv1.loadFromUri("/models"),
-        faceapi.nets.faceLandmark68Net.loadFromUri("/models"),
-        faceapi.nets.faceRecognitionNet.loadFromUri("/models"),
-      ]);
-      setMessage("พร้อมแล้ว! หันหน้าตรง แล้วกดปุ่ม");
-      await startCamera();
-    } catch {
-      setMessage("❌ โหลดโมเดลไม่สำเร็จ");
-    }
-  }, []);
+  // CHANGED: play เมื่อพร้อม ลด "play() request was interrupted"
+  const playWhenReady = (videoEl) =>
+    new Promise((resolve) => {
+      if (!videoEl) return resolve();
+      if (!videoEl.paused && !videoEl.ended) return resolve();
+      const onCanPlay = () => {
+        videoEl.removeEventListener("canplay", onCanPlay);
+        videoEl.play().catch(() => {}); // เงียบ AbortError
+        resolve();
+      };
+      videoEl.addEventListener("canplay", onCanPlay, { once: true });
+    });
 
   useEffect(() => {
     if (!user) return navigate("/login");
     if (user.role !== "student") return navigate("/");
     if (user.faceScanned) return navigate("/student-dashboard");
-    loadModels();
-    return () => stopCameraInstant();
-  }, [user, navigate, loadModels]);
 
-  const captureFace = async () => {
+    const initCamera = async () => {
+      try {
+        // CHANGED: ขอแบบกล้องหน้า + audio=false
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: "user" },
+          audio: false,
+        });
+
+        const videoEl = videoRef.current;
+        if (videoEl) {
+          // CHANGED: กัน race โดยเคลียร์ของเก่าก่อน
+          stopCameraInstant(videoEl);
+          videoEl.srcObject = stream;
+          await playWhenReady(videoEl); // รอจนพร้อมแล้วค่อย play
+          setMessage(directions[0].message);
+        }
+      } catch (err) {
+        console.error("❌ Camera access denied:", err);
+        setMessage("❌ โปรดอนุญาตให้ใช้กล้อง");
+      }
+    };
+
+    initCamera();
+
+    // CHANGED: จับอ้างอิง element ไว้ใช้ใน cleanup (แก้ warning ESLint)
+    const videoEl = videoRef.current;
+    return () => {
+      stopCameraInstant(videoEl);
+    };
+  }, [user, navigate]);
+
+  const captureImage = () => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 400;
+    canvas.height = 300;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(videoRef.current, 0, 0, 400, 300);
+    const dataUrl = canvas.toDataURL("image/jpeg");
+
+    const directionKey = directions[currentStep].key;
+    setCapturedImages((prev) => ({ ...prev, [directionKey]: dataUrl }));
+
+    if (currentStep < directions.length - 1) {
+      setCurrentStep((prev) => prev + 1);
+      setMessage(directions[currentStep + 1].message);
+    } else {
+      handleSubmit({ ...capturedImages, [directionKey]: dataUrl });
+    }
+  };
+
+  const handleSubmit = async (images) => {
     setLoading(true);
-    setMessage("กำลังตรวจจับใบหน้า...");
+    setMessage("⏳ กำลังส่งข้อมูล...");
 
-    const detections = await faceapi
-      .detectAllFaces(videoRef.current, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 }))
-      .withFaceLandmarks()
-      .withFaceDescriptors();
+    const formData = new FormData();
+    formData.append("fullname", user.fullname || user.fullName); // รองรับสองแบบ
+    formData.append("studentID", user.studentID || user.studentId);
 
-    if (!detections.length) {
-      setMessage("❌ ไม่พบใบหน้า ลองใหม่อีกครั้ง");
-      setLoading(false);
-      return;
-    }
-
-    const descriptorArray = Array.from(detections[0].descriptor);
-    const token = sessionStorage.getItem("token");
-
-    if (!token) {
-      stopCameraInstant();
-      alert("! กรุณาเข้าสู่ระบบใหม่");
-      sessionStorage.clear();
-      return navigate("/login");
-    }
+    Object.entries(images).forEach(([key, base64]) => {
+      const blob = dataURLtoBlob(base64);
+      formData.append(key, blob, `${key}.jpg`);
+    });
 
     try {
-      const res = await fetch("https://backendfaceattendance-production.up.railway.app/auth/upload-face", {
+      const res = await fetch(`http://localhost:8000/auth/save-face-model`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ faceDescriptor: descriptorArray }),
+        body: formData,
       });
-
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "❌ บันทึกใบหน้าไม่สำเร็จ");
 
-      stopCameraInstant();
-      alert("✅ บันทึกใบหน้าสำเร็จ!");
-      user.faceScanned = true;
-      login(user, token);
-      navigate("/student-dashboard");
+      if (data.status === "verified") {
+        alert("✅ บันทึกใบหน้าสำเร็จ");
+        const updatedUser = {
+          ...user,
+          faceScanned: true,
+          fullName: data.user?.fullName ?? user.fullName ?? user.fullname,
+          studentId: data.user?.studentId ?? user.studentId ?? user.studentID,
+        };
+        login(updatedUser, sessionStorage.getItem("token"));
+        navigate("/student-dashboard");
+      } else if (data.status === "not_verified") {
+        alert("❌ ไม่สามารถยืนยันใบหน้าได้ กรุณาทำใหม่");
+        setCapturedImages({});
+        setCurrentStep(0);
+        setMessage(directions[0].message);
+      } else {
+        alert("❌ เกิดข้อผิดพลาดในการส่งข้อมูล");
+      }
     } catch (err) {
-      setMessage("❌ บันทึกใบหน้าไม่สำเร็จ");
+      console.error(err);
+      alert("❌ เกิดข้อผิดพลาดในการส่งข้อมูล");
     } finally {
       setLoading(false);
     }
   };
 
+  const dataURLtoBlob = (dataurl) => {
+    const arr = dataurl.split(",");
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) u8arr[n] = bstr.charCodeAt(n);
+    return new Blob([u8arr], { type: mime });
+  };
+
   return (
-    <div className="container text-cente">
+    <div className="container text-center">
       <h2>บันทึกใบหน้า</h2>
       <p>{message}</p>
-
-      <div className="d-flex justify-content-center my-3">
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          width="400"
-          height="300"
-          className="rounded shadow"
-          style={{ transform: "scaleX(-1)" }}
-        />
-      </div>
-
-      <div className="d-flex justify-content-center gap-2">
-        <button className="btn btn-success" onClick={captureFace} disabled={loading}>
-          {loading && <span className="spinner-border spinner-border-sm" role="status" />}
-          {loading ? "กำลังบันทึก..." : "บันทึกใบหน้า"}
-        </button>
-      </div>
+      <video ref={videoRef} width="400" height="300" autoPlay playsInline muted className="rounded shadow" />
+      <br />
+      <button onClick={captureImage} disabled={loading} className="btn btn-primary mt-3">
+        {loading ? "กำลังส่ง..." : "ถ่ายภาพ"}
+      </button>
     </div>
   );
 };
