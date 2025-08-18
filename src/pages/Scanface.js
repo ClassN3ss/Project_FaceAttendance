@@ -21,19 +21,31 @@ const Scanface = () => {
       stream.getTracks().forEach((track) => track.stop());
       videoRef.current.srcObject = null;
     }
+    setVideoReady(false);
   };
 
   const startCamera = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      // ✅ ใช้กล้องหน้า + ปิดเสียง
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user" },
+        audio: false,
+      });
       if (videoRef.current) {
+        // เคลียร์ของเก่า (กัน race)
+        const old = videoRef.current.srcObject;
+        if (old) old.getTracks().forEach((t) => t.stop());
+
         videoRef.current.srcObject = stream;
         videoRef.current.onloadedmetadata = () => {
-          videoRef.current.play().catch((err) => console.warn("play() interrupted", err));
+          videoRef.current.play().then(() => setVideoReady(true)).catch((err) => {
+            console.warn("play() interrupted", err);
+          });
         };
       }
     } catch {
       setMessage("❌ โปรดอนุญาตให้เว็บไซต์ใช้กล้องของคุณ");
+      setVideoReady(false);
     }
   };
 
@@ -124,13 +136,21 @@ const Scanface = () => {
     setMessage("กำลังตรวจจับใบหน้า...");
 
     try {
-      // 1) ถ่ายภาพจากวิดีโอ
+      // 1) ถ่ายภาพจากวิดีโอ (วิดีโอเป็น mirror → แก้ทิศก่อนส่ง)
       const canvas = document.createElement("canvas");
-      const context = canvas.getContext("2d");
-      canvas.width = videoRef.current.videoWidth;
-      canvas.height = videoRef.current.videoHeight;
-      context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-      const imageBlob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg"));
+      const v = videoRef.current;
+      canvas.width = v.videoWidth;
+      canvas.height = v.videoHeight;
+      const ctx = canvas.getContext("2d");
+
+      // 🔁 กลับด้านให้เป็นภาพปกติก่อน
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(v, 0, 0, canvas.width, canvas.height);
+
+      const imageBlob = await new Promise((resolve) =>
+        canvas.toBlob(resolve, "image/jpeg")
+      );
 
       // 2) เรียก Face API (เส้นที่ 1): verify-one
       const sid =
@@ -142,9 +162,6 @@ const Scanface = () => {
         localStorage.getItem("fullName") ||
         "";
 
-      console.log("[Scanface] studentId =", sid, "fullName =", sname);
-
-      // กันกรณีไม่มีค่า -> แจ้งผู้ใช้ แล้วหยุด
       if (!sid.trim()) {
         setMessage("❌ ไม่พบรหัสนักศึกษา (studentId) ใน session — โปรดล็อกอินใหม่");
         setLoading(false);
@@ -157,8 +174,8 @@ const Scanface = () => {
       }
 
       const modelForm = new FormData();
-      modelForm.append("fullname", sessionStorage.getItem("fullName") || "");
-      modelForm.append("studentID", sessionStorage.getItem("studentId") || "");
+      modelForm.append("fullname", sname);
+      modelForm.append("studentID", sid);
       modelForm.append("image", imageBlob);
 
       const verifyRes = await fetch(`http://localhost:5000/api/scan-face`, {
@@ -202,7 +219,6 @@ const Scanface = () => {
         longitude: gps.longitude,
         sessionId: session._id,
         locationName: session?.location?.name || null,
-        // (ออปชัน) เก็บผลเทียบเพื่อ audit
         matchRef: {
           distance: verifyData.distance,
           threshold: verifyData.threshold,
@@ -210,7 +226,6 @@ const Scanface = () => {
       };
 
       if (session.withTeacherFace) {
-        // ถ้ากำหนดให้ยืนยันใบหน้าครู คง flow เดิม
         return redirectToTeacherScan(payload);
       }
 
@@ -233,16 +248,17 @@ const Scanface = () => {
           ref={videoRef}
           autoPlay
           playsInline
+          muted
           width="400"
           height="300"
           onLoadedData={() => setVideoReady(true)}
           className="rounded shadow"
-          style={{ transform: "scaleX(-1)" }}
+          style={{ transform: "scaleX(-1)" }}  // แสดงแบบกระจก
         />
       </div>
 
       <div className="d-flex justify-content-center gap-2">
-        <button className="btn btn-success" onClick={scanFace} disabled={loading}>
+        <button className="btn btn-success" onClick={scanFace} disabled={loading || !videoReady}>
           {loading ? "กำลังตรวจสอบ..." : "✅ เริ่มสแกนใบหน้า"}
         </button>
         <button
