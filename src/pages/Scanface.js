@@ -178,7 +178,7 @@ const Scanface = () => {
       modelForm.append("studentID", sid);
       modelForm.append("image", imageBlob);
 
-      const verifyRes = await fetch(`http://localhost:5000/api/scan-face`, {
+      const verifyRes = await fetch(`https://face-api-md-97765e8728dc.herokuapp.com/api/scan-face`, {
         method: "POST",
         body: modelForm,
       });
