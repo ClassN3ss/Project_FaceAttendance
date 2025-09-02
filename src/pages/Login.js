@@ -25,7 +25,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:8000/auth/login", {
+      const res = await axios.post("https://be-attendance-4cec7c12e4bd.herokuapp.com/auth/login", {
         username,
         password,
       });

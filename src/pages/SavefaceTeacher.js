@@ -143,7 +143,7 @@ const SavefaceTeacher = () => {
       form.append("image", blob, `${safeName}.jpg`);
       form.append("fullname", fullname);
 
-      const res = await API.post("http://localhost:8000/auth/save-teacher-face", form, {
+      const res = await API.post("https://be-attendance-4cec7c12e4bd.herokuapp.com/auth/save-teacher-face", form, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
