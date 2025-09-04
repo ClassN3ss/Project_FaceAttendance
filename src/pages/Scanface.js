@@ -173,16 +173,22 @@ const Scanface = () => {
         return;
       }
 
-      const modelForm = new FormData();
-      modelForm.append("fullname", sname);
-      modelForm.append("studentID", sid);
-      modelForm.append("image", imageBlob);
+      const fd = new FormData();
+      fd.append("image", imageBlob, "face.jpg");
+      fd.append("studentID", sid);
+      fd.append("fullname", sname);
 
-      const verifyRes = await fetch(`https://face-api-md-3cf4e65c1187.herokuapp.com/api/scan-face`, {
-        method: "POST",
-        body: modelForm,
-      });
-      const verifyData = await verifyRes.json();
+      const token = sessionStorage.getItem("token");
+      const { data: verifyData } = await API.post(
+        "/face/verify-by-image",
+        fd,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
       if (!verifyData.ok || !verifyData.match) {
         setMessage(verifyData.message || "❌ ใบหน้าไม่ถูกต้อง กรุณาลองใหม่");
@@ -229,7 +235,6 @@ const Scanface = () => {
         return redirectToTeacherScan(payload);
       }
 
-      const token = sessionStorage.getItem("token");
       await handleNormalCheckin(payload, token);
     } catch (error) {
       setMessage(error.message || "❌ เกิดข้อผิดพลาดในการเช็คชื่อ");
