@@ -39,7 +39,7 @@ const Register = () => {
     }
 
     try {
-      const res = await axios.post("https://be-attendance-4cec7c12e4bd.herokuapp.com/auth/register", {
+      const res = await axios.post("https://be-attendance-abb3a12f3db3.herokuapp.com/auth/register", {
         studentId,
         fullName,
       });
