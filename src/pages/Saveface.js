@@ -10,8 +10,11 @@ const directions = [
   { key: "left", message: "เอียงหน้าซ้ายเล็กน้อย" },
   { key: "right", message: "เอียงหน้าขวาเล็กน้อย" },
   { key: "up", message: "เงยหน้าเล็กน้อย" },
-  { key: "down", message: "ก้มหน้าเล้กน้อย" },
+  { key: "down", message: "ก้มหน้าเล็กน้อย" },
 ];
+
+// helper: ตรวจว่ามือถือหรือไม่
+const isMobile = () => /Android|iPhone|iPad/i.test(navigator.userAgent);
 
 const Saveface = () => {
   const videoRef = useRef(null);
@@ -19,11 +22,9 @@ const Saveface = () => {
   const { user, login } = useAuth();
 
   const [currentStep, setCurrentStep] = useState(0);
-  const [capturedImages, setCapturedImages] = useState({});
   const [message, setMessage] = useState("กำลังโหลดกล้อง...");
   const [loading, setLoading] = useState(false);
 
-  // CHANGED: helper ปิดกล้องให้สะอาด ลด AbortError ตอน unmount
   const stopCameraInstant = (videoEl) => {
     const v = videoEl || videoRef.current;
     const stream = v?.srcObject;
@@ -34,14 +35,13 @@ const Saveface = () => {
     }
   };
 
-  // CHANGED: play เมื่อพร้อม ลด "play() request was interrupted"
   const playWhenReady = (videoEl) =>
     new Promise((resolve) => {
       if (!videoEl) return resolve();
       if (!videoEl.paused && !videoEl.ended) return resolve();
       const onCanPlay = () => {
         videoEl.removeEventListener("canplay", onCanPlay);
-        videoEl.play().catch(() => {}); // เงียบ AbortError
+        videoEl.play().catch(() => {});
         resolve();
       };
       videoEl.addEventListener("canplay", onCanPlay, { once: true });
@@ -54,7 +54,6 @@ const Saveface = () => {
 
     const initCamera = async () => {
       try {
-        // CHANGED: ขอแบบกล้องหน้า + audio=false
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: "user" },
           audio: false,
@@ -62,10 +61,9 @@ const Saveface = () => {
 
         const videoEl = videoRef.current;
         if (videoEl) {
-          // CHANGED: กัน race โดยเคลียร์ของเก่าก่อน
           stopCameraInstant(videoEl);
           videoEl.srcObject = stream;
-          await playWhenReady(videoEl); // รอจนพร้อมแล้วค่อย play
+          await playWhenReady(videoEl);
           setMessage(directions[0].message);
         }
       } catch (err) {
@@ -75,8 +73,6 @@ const Saveface = () => {
     };
 
     initCamera();
-
-    // CHANGED: จับอ้างอิง element ไว้ใช้ใน cleanup (แก้ warning ESLint)
     const videoEl = videoRef.current;
     return () => {
       stopCameraInstant(videoEl);
@@ -85,60 +81,74 @@ const Saveface = () => {
 
   const captureImage = () => {
     const canvas = document.createElement("canvas");
-    canvas.width = 400;
-    canvas.height = 300;
+
+    if (isMobile()) {
+      canvas.width = 320;
+      canvas.height = 240;
+    } else {
+      canvas.width = 400;
+      canvas.height = 300;
+    }
+
     const ctx = canvas.getContext("2d");
-    ctx.drawImage(videoRef.current, 0, 0, 400, 300);
-    const dataUrl = canvas.toDataURL("image/jpeg");
+    ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
 
     const directionKey = directions[currentStep].key;
-    setCapturedImages((prev) => ({ ...prev, [directionKey]: dataUrl }));
 
-    if (currentStep < directions.length - 1) {
-      setCurrentStep((prev) => prev + 1);
-      setMessage(directions[currentStep + 1].message);
+    if (isMobile()) {
+      canvas.toBlob(
+        (blob) => {
+          sendSingleImage(directionKey, blob);
+        },
+        "image/jpeg",
+        0.7
+      );
     } else {
-      handleSubmit({ ...capturedImages, [directionKey]: dataUrl });
+      const dataUrl = canvas.toDataURL("image/jpeg");
+      const blob = dataURLtoBlob(dataUrl);
+      sendSingleImage(directionKey, blob);
     }
   };
 
-  const handleSubmit = async (images) => {
+  const sendSingleImage = async (key, blob) => {
     setLoading(true);
-    setMessage("⏳ กำลังส่งข้อมูล...");
+    setMessage(`⏳ กำลังส่งภาพ ${key}...`);
 
     const formData = new FormData();
-    formData.append("fullname", user.fullname || user.fullName); // รองรับสองแบบ
+    formData.append("fullname", user.fullname || user.fullName);
     formData.append("studentID", user.studentID || user.studentId);
-
-    Object.entries(images).forEach(([key, base64]) => {
-      const blob = dataURLtoBlob(base64);
-      formData.append(key, blob, `${key}.jpg`);
-    });
+    formData.append("direction", key); // บอกว่าเป็นภาพทิศไหน
+    formData.append("image", blob, `${key}.jpg`);
 
     try {
-      const res = await fetch(`https://be-attendance-abb3a12f3db3.herokuapp.com/auth/save-face-model`, {
+      const res = await fetch(`https://be-attendance-abb3a12f3db3.herokuapp.com/auth/save-face-part`, {
         method: "POST",
         body: formData,
       });
       const data = await res.json();
 
-      if (data.status === "verified") {
-        alert("✅ บันทึกใบหน้าสำเร็จ");
-        const updatedUser = {
-          ...user,
-          faceScanned: true,
-          fullName: data.user?.fullName ?? user.fullName ?? user.fullname,
-          studentId: data.user?.studentId ?? user.studentId ?? user.studentID,
-        };
-        login(updatedUser, sessionStorage.getItem("token"));
-        navigate("/student-dashboard");
-      } else if (data.status === "not_verified") {
-        alert("❌ ไม่สามารถยืนยันใบหน้าได้ กรุณาทำใหม่");
-        setCapturedImages({});
-        setCurrentStep(0);
-        setMessage(directions[0].message);
+      if (data.status === "ok") {
+        if (currentStep < directions.length - 1) {
+          setCurrentStep((prev) => prev + 1);
+          setMessage(directions[currentStep + 1].message);
+        } else {
+          setMessage("✅ ส่งรูปครบทุกมุมแล้ว กำลังตรวจสอบ...");
+          // Trigger ให้ BE ตรวจสอบรวม
+          await fetch(`https://be-attendance-abb3a12f3db3.herokuapp.com/auth/verify-face-all`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ studentID: user.studentID }),
+          });
+          alert("✅ บันทึกใบหน้าสำเร็จ");
+          const updatedUser = {
+            ...user,
+            faceScanned: true,
+          };
+          login(updatedUser, sessionStorage.getItem("token"));
+          navigate("/student-dashboard");
+        }
       } else {
-        alert("❌ เกิดข้อผิดพลาดในการส่งข้อมูล");
+        alert("❌ ส่งรูปไม่สำเร็จ กรุณาลองใหม่");
       }
     } catch (err) {
       console.error(err);
