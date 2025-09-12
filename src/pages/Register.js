@@ -69,9 +69,7 @@ const Register = () => {
   const handleCopy = () => {
     if (!generatedCredentials) return;
     const username = generatedCredentials.username.replaceAll("-", "");
-    const password = generatedCredentials.password.replaceAll("-", "");
-    const text = `Username: ${username}\nPassword: ${password}`;
-    navigator.clipboard.writeText(text);
+    navigator.clipboard.writeText(username);
     alert("คัดลอกสำเร็จ!");
   };
 

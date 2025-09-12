@@ -65,8 +65,8 @@ const NewRegister = () => {
 
   const handleCopy = () => {
     if (!generated) return;
-    const text = `Username: ${generated.username}\nPassword: ${generated.password}`;
-    navigator.clipboard.writeText(text);
+    const username = generated.username;
+    navigator.clipboard.writeText(username);
     alert("คัดลอกสำเร็จ!");
   };
 

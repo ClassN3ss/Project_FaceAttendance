@@ -7,10 +7,10 @@ import "../styles/saveface.css";
 
 const directions = [
   { key: "front", message: "หันหน้าตรง" },
-  { key: "left", message: "หันหน้าซ้าย" },
-  { key: "right", message: "หันหน้าขวา" },
-  { key: "up", message: "เงยหน้า" },
-  { key: "down", message: "ก้มหน้า" },
+  { key: "left", message: "เอียงหน้าซ้ายเล็กน้อย" },
+  { key: "right", message: "เอียงหน้าขวาเล็กน้อย" },
+  { key: "up", message: "เงยหน้าเล็กน้อย" },
+  { key: "down", message: "ก้มหน้าเล้กน้อย" },
 ];
 
 const Saveface = () => {
