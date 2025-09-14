@@ -85,8 +85,8 @@ const Saveface = () => {
 
     if (isMobile()) {
       // ✅ Mobile → resize เล็กลง
-      canvas.width = 320;
-      canvas.height = 240;
+      canvas.width = 256;
+      canvas.height = 256;
     } else {
       // PC → ใช้ปกติ
       canvas.width = 400;
@@ -110,7 +110,7 @@ const Saveface = () => {
           }
         },
         "image/jpeg",
-        0.8
+        1.0
       );
     } else {
       // ✅ PC → ใช้ JPEG แบบเดิม
