@@ -99,7 +99,6 @@ const Saveface = () => {
     const directionKey = directions[currentStep].key;
 
     if (isMobile()) {
-      // ✅ Mobile → ใช้ WebP + quality 0.5
       canvas.toBlob(
         (blob) => {
           setCapturedImages((prev) => ({ ...prev, [directionKey]: blob }));
