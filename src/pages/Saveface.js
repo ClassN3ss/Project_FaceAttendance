@@ -111,7 +111,7 @@ const Saveface = () => {
           }
         },
         "image/jpeg",
-        0.6
+        0.8
       );
     } else {
       // ✅ PC → ใช้ JPEG แบบเดิม
