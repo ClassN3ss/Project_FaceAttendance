@@ -110,8 +110,8 @@ const Saveface = () => {
             handleSubmit({ ...capturedImages, [directionKey]: blob });
           }
         },
-        "image/webp",
-        0.5
+        "image/jpeg",
+        0.6
       );
     } else {
       // ✅ PC → ใช้ JPEG แบบเดิม
@@ -137,8 +137,7 @@ const Saveface = () => {
     formData.append("studentID", user.studentID || user.studentId);
 
     Object.entries(images).forEach(([key, blob]) => {
-      const ext = isMobile() ? "webp" : "jpg"; // ✅ Mobile → webp, PC → jpg
-      formData.append(key, blob, `${key}.${ext}`);
+      formData.append(key, blob, `${key}.jpg`);
     });
 
     try {
