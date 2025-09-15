@@ -89,7 +89,7 @@ const Saveface = () => {
     canvas.height = 300;
     const ctx = canvas.getContext("2d");
     ctx.drawImage(videoRef.current, 0, 0, 400, 300);
-    const dataUrl = canvas.toDataURL("image/jpeg");
+    const dataUrl = canvas.toDataURL("image/webp");
 
     const directionKey = directions[currentStep].key;
     setCapturedImages((prev) => ({ ...prev, [directionKey]: dataUrl }));
