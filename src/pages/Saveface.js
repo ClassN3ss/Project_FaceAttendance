@@ -92,6 +92,7 @@ const Saveface = () => {
     const dataUrl = canvas.toDataURL("image/jpeg");
 
     const directionKey = directions[currentStep].key;
+    console.log(`📸 Captured ${directionKey} image`);
     setCapturedImages((prev) => ({ ...prev, [directionKey]: dataUrl }));
 
     if (currentStep < directions.length - 1) {
@@ -115,12 +116,16 @@ const Saveface = () => {
       formData.append(key, blob, `${key}.jpg`);
     });
 
+    console.log("🚀 handleSubmit() called with images keys:", Object.keys(images));
+
     try {
       const res = await fetch(`https://be-attendance-ce925d697388.herokuapp.com/auth/save-face-model`, {
         method: "POST",
         body: formData,
       });
+      console.log("📤 Request sent to BE:", formData);
       const data = await res.json();
+      console.log("📥 Response from BE:", data);
 
       if (data.status === "verified") {
         alert("✅ บันทึกใบหน้าสำเร็จ");
