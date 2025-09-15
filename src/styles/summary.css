@@ -1,0 +1,52 @@
+body {
+  background: radial-gradient(circle at center, #15803d, #0f3d26, #0D2212);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+  background-position: center;
+  min-height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+  color: #d1fae5;
+}
+.badge {
+  font-size: 1rem;
+  padding: 8px 16px;
+  border-radius: 999px;
+}
+
+.student-name {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #333;
+}
+
+.student-item {
+  background-color: #f9f9f9;
+  border: 1px solid #dee2e6;
+  border-radius: 0.5rem;
+  margin-bottom: 12px;
+  padding: 16px;
+}
+
+.summary-row {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.btn-outline-success {
+  background-color: #fad1d1;
+  color: #5f0606;
+  font-weight: 500;
+  border-radius: 12px;
+  height: 42px;
+  border: 2px solid red;
+  padding: 0 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-outline-success:hover {
+  background-color: #064e3b;
+  color: #bbf7d0;
+}

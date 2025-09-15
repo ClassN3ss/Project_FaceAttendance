@@ -1,0 +1,186 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  transition: padding-top 0.3s ease;
+}
+
+.navbar-custom {
+  background: linear-gradient(135deg, #e8fef0, #d0f5dc);
+  color: #0f5132;
+  padding: 1rem 2rem;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1050;
+  box-shadow: 0 10px 18px rgba(16, 185, 129, 0.25),
+              inset 0 -1px 0 rgba(34, 197, 94, 0.15);
+  backdrop-filter: blur(8px);
+  border-bottom: none;
+  font-size: 1.05rem;
+}
+
+.navbar-custom .navbar-brand {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #0f5132 !important;
+}
+
+.navbar-toggler {
+  font-size: 1.5rem;
+  background-color: transparent;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.navbar-toggler.active {
+  background-color: #bbf7d0;
+  border: 2px solid #047857;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.4);
+  border-radius: 8px;
+}
+
+.navbar-custom .nav-link,
+.navbar-custom small {
+  color: #0f5132 !important;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: background 0.2s ease;
+}
+
+.navbar-custom .nav-link:hover {
+  background: rgba(34, 197, 94, 0.1);
+  color: #15803d !important;
+}
+
+.navbar-custom .text-muted {
+  color: #065f46 !important;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.profile-icon {
+  width: 40px;
+  height: 40px;
+  background-color: #d1fae5;
+  color: #0f5132;
+  font-size: 20px;
+  font-weight: bold;
+  border-radius: 50%;
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+}
+
+.profile-icon:hover {
+  background-color: #bbf7d0;
+}
+
+.profile-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  left: auto;
+  background: #ecfdf5;
+  color: #064e3b;
+  padding: 1rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(16, 185, 129, 0.2);
+  min-width: 200px;
+  max-width: 95vw;
+  z-index: 999;
+  animation: fadeIn 0.3s ease-in-out;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.dropdown-id {
+  font-size: 1rem;
+  color: #065f46;
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}
+
+.dropdown-name,
+.dropdown-email,
+.dropdown-role {
+  font-size: 1rem;
+  color: #047857;
+  margin-bottom: 0.25rem;
+}
+
+.logout-btn {
+  background-color: #dcfce7;
+  color: #065f46;
+  border: 1px solid #10b981;
+  width: 100%;
+  font-weight: 500;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.logout-btn:hover {
+  background-color: #bbf7d0;
+}
+
+/* ✅ Responsive */
+@media (min-width: 769px) and (max-width: 992px) {
+  .navbar-custom .navbar-brand {
+    font-size: 1.2rem;
+  }
+
+  .navbar-custom .nav-link {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .profile-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+
+  .profile-dropdown {
+    font-size: 0.95rem;
+    padding: 0.75rem;
+    min-width: 220px;
+    left: 0 !important;
+    right: auto !important;
+  }
+
+  .logout-btn {
+    font-size: 0.9rem;
+    padding: 6px 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar-custom .navbar-brand {
+    font-size: 1.2rem;
+  }
+
+  .navbar-custom .nav-link {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .profile-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+
+  .profile-dropdown {
+    font-size: 0.95rem;
+    padding: 0.75rem;
+    min-width: 220px;
+    left: 0 !important;
+    right: auto !important;
+  }
+
+  .logout-btn {
+    font-size: 0.9rem;
+    padding: 6px 12px;
+  }
+}
