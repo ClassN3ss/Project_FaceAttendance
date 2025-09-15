@@ -116,7 +116,11 @@ const Saveface = () => {
     });
 
     try {
+<<<<<<< HEAD
       const res = await fetch(`https://be-attendance-ce925d697388.herokuapp.com/auth/save-face-model`, {
+=======
+      const res = await fetch(`https://be-attendance-abb3a12f3db3.herokuapp.com/auth/save-face-model`, {
+>>>>>>> d528d498fe528cfaf0279e44263a49fe5c5609af
         method: "POST",
         body: formData,
       });
