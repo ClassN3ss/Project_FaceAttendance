@@ -84,11 +84,12 @@ const Saveface = () => {
   }, [user, navigate]);
 
   const captureImage = () => {
+    const videoEl = videoRef.current;
     const canvas = document.createElement("canvas");
     canvas.width = videoEl.videoWidth;
     canvas.height = videoEl.videoHeight;
     const ctx = canvas.getContext("2d");
-    ctx.drawImage(videoRef.current, 0, 0, 400, 300);
+    ctx.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
     const dataUrl = canvas.toDataURL("image/jpeg");
 
     const directionKey = directions[currentStep].key;
