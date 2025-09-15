@@ -19,7 +19,7 @@ import SavefaceTeacher from "./pages/SavefaceTeacher";
 import VerifyfaceTeacher from "./pages/VerifyfaceTeacher";
 import ClassHistoryList from "./pages/ClassHistoryList";
 import ClassHistoryDetail from "./pages/ClassHistoryDetail";
-import ManageListPage from "./pages/Usermanage";
+import ManageListPage from "./pages/ManageListPage";
 import NewRegister from "./pages/NewRegister";
 import Summary from "./pages/Summary";
 import StudentRequest from "./pages/StudentRequest"
