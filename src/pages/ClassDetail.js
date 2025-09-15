@@ -323,8 +323,8 @@ const ClassDetail = () => {
         n.delete(reqId);
         return n;
       });
-    } catch {
-      console.error(e);
+    } catch (err) {
+      console.error(err);
       alert("อนุมัติไม่สำเร็จ");
     }
     window.location.reload();
@@ -341,12 +341,25 @@ const ClassDetail = () => {
       n.delete(reqId);
       return n;
     });
-    } catch {
-      console.error(e);
+    } catch (err) {
+      console.error(err);
       alert("ปฏิเสธไม่สำเร็จ");
     }
     window.location.reload();
   };
+
+  const allSelected = requests.length > 0 && requests.every((r) => selectedReq.has(r._id));
+  const toggleOne = (rid) => setSelectedReq((prev) => {
+      const n = new Set(prev);
+      n.has(rid) ? n.delete(rid) : n.add(rid);
+      return n;
+  });
+  const toggleAll = () => setSelectedReq((prev) => {
+      const n = new Set(prev);
+      if (allSelected) requests.forEach((r) => n.delete(r._id));
+      else requests.forEach((r) => n.add(r._id));
+      return n;
+  });
 
   const handleApproveSelected = async () => {
     const ids = requests.filter((r) => selectedReq.has(r._id)).map((r) => r._id);
@@ -718,11 +731,16 @@ const ClassDetail = () => {
       ) : (
         <ul className="list-group mb-4">
           {requests.map((r) => (
-            <li key={r._id} className="list-group-item d-flex justify-content-between">
-              <span>{r.student?.fullName} ({r.student?.studentId})</span>
+            <li key={r._id} className="list-group-item d-flex justify-content-between align-items-center" >
+              <div className="d-flex align-items-center gap-3">
+                <input type="checkbox" className="form-check-input" checked={selectedReq.has(r._id)} onChange={() => toggleOne(r._id)} />
+                <span>
+                  {r.student?.fullName} ({r.student?.studentId})
+                </span>
+              </div>
               <div>
-                <button className="btn btn-success btn-sm me-2" onClick={() => handleApprove(r._id)}>✅ อนุมัติ</button>
-                <button className="btn btn-danger btn-sm" onClick={() => handleReject(r._id)}>❌ ปฏิเสธ</button>
+                <button className="btn btn-success btn-sm me-2" onClick={() => handleApprove(r._id)} > ✅ อนุมัติ </button>
+                <button className="btn btn-danger btn-sm" onClick={() => handleReject(r._id)} > ❌ ปฏิเสธ </button>
               </div>
             </li>
           ))}
