@@ -79,7 +79,8 @@ const Navbar = () => {
         return (
           <>
             <Link className="nav-link" to="/admin-dashboard" onClick={closeMenu}>Dashboard</Link>
-            <Link className="nav-link" to="/manage-list" onClick={closeMenu}>Manage List</Link>
+            <Link className="nav-link" to="/student-requests" onClick={closeMenu}>Student Request</Link>
+            <Link className="nav-link" to="/manage-list" onClick={closeMenu}>User Management</Link>
           </>
         );
       default:

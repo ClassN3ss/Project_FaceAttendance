@@ -75,7 +75,6 @@ export default function AdminDashboard() {
       )}
 
       <ClassList key={reload} />
-      <RequestTable />
       <FaceScanHistory />
     </div>
   );

@@ -14,6 +14,8 @@ const ClassDetail = () => {
   const [requests, setRequests] = useState([]);
   const [activeSession, setActiveSession] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const [selectedReq, setSelectedReq] = useState(() => new Set());
   const [showCheckinTimeInputs, setShowCheckinTimeInputs] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [showFaceModal, setShowFaceModal] = useState(false);
@@ -24,6 +26,9 @@ const ClassDetail = () => {
   const markerRef = useRef(null);
   const [pickLatLng, setPickLatLng] = useState(null);
   const [searchText, setSearchText] = useState("");
+
+  const [studentPage, setStudentPage] = useState(1);
+  const [studentQuery, setStudentQuery] = useState("");
 
   const { user } = useAuth();
   const token = sessionStorage.getItem("token");
@@ -51,10 +56,12 @@ const ClassDetail = () => {
       const res = await API.get("/enrollments/messages", {
         headers: { Authorization: `Bearer ${token}` },
       });
+      const list = Array.isArray(res.data) ? res.data : res.data?.items || [];
       const filtered = res.data.filter(r => r.classId?._id === id || r.classId === id);
       setRequests(filtered);
     } catch (err) {
       console.error("❌ โหลดคำร้องล้มเหลว", err);
+      setRequests([]);
     }
   }, [id, token]);
 
@@ -95,7 +102,11 @@ const ClassDetail = () => {
     }, 2000);
   
     return () => clearInterval(interval);
-  }, [activeSession]);  
+  }, [activeSession]);
+  
+  useEffect(() => {
+    setStudentPage(1);
+  }, [classInfo?.students?.length, studentQuery]);
 
   const ensureLeafletLoaded = () =>
     new Promise((resolve, reject) => {
@@ -302,23 +313,102 @@ const ClassDetail = () => {
   };
 
   const handleApprove = async (reqId) => {
-    await API.put(`/enrollments/approve/${reqId}`, {}, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    setRequests(prev => prev.filter(r => r._id !== reqId));
+    try{
+        await API.put(`/enrollments/approve/${reqId}`, {}, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setRequests(prev => prev.filter(r => r._id !== reqId));
+      setSelectedReq((prev) => {
+        const n = new Set(prev);
+        n.delete(reqId);
+        return n;
+      });
+    } catch {
+      console.error(e);
+      alert("อนุมัติไม่สำเร็จ");
+    }
     window.location.reload();
   };
 
   const handleReject = async (reqId) => {
-    await API.delete(`/enrollments/${reqId}`, {
+    try{
+      await API.delete(`/enrollments/${reqId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     setRequests(prev => prev.filter(r => r._id !== reqId));
+    setSelectedReq((prev) => {
+      const n = new Set(prev);
+      n.delete(reqId);
+      return n;
+    });
+    } catch {
+      console.error(e);
+      alert("ปฏิเสธไม่สำเร็จ");
+    }
     window.location.reload();
+  };
+
+  const handleApproveSelected = async () => {
+    const ids = requests.filter((r) => selectedReq.has(r._id)).map((r) => r._id);
+    if (ids.length === 0) return;
+    try {
+      await Promise.all(
+        ids.map((rid) =>
+          API.put(`/enrollments/approve/${rid}`, {}, { headers: { Authorization: `Bearer ${token}` } })
+        )
+      );
+      setRequests((prev) => prev.filter((r) => !selectedReq.has(r._id)));
+      setSelectedReq(new Set());
+    } catch (e) {
+      console.error(e);
+      alert("ยืนยันที่เลือกไม่สำเร็จ");
+    }
+  };
+
+  const handleRejectSelected = async () => {
+    const ids = requests.filter((r) => selectedReq.has(r._id)).map((r) => r._id);
+    if (ids.length === 0) return;
+    try {
+      await Promise.all(
+        ids.map((rid) =>
+          API.delete(`/enrollments/${rid}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+        )
+      );
+      setRequests((prev) => prev.filter((r) => !selectedReq.has(r._id)));
+      setSelectedReq(new Set());
+    } catch (e) {
+      console.error(e);
+      alert("ปฏิเสธที่เลือกไม่สำเร็จ");
+    }
   };
 
   if (loading) return <div className="container mt-4">กำลังโหลดข้อมูลห้อง...</div>;
   if (!classInfo) return <div className="container mt-4 text-danger">❌ ไม่พบข้อมูลห้องเรียน</div>;
+
+  // Students pagination + search computed values
+  const allStudents = classInfo?.students || [];
+  const q = studentQuery.trim().toLowerCase();
+  const filteredStudents = q
+    ? allStudents.filter((s) => {
+        const name = (s.fullName || "").toLowerCase();
+        const sid = (s.studentId || s.username || "").toLowerCase();
+        return name.includes(q) || sid.includes(q);
+      })
+    : allStudents;
+
+  const totalStudents = filteredStudents.length;
+  const STUDENTS_PER_PAGE = 10;
+  const totalStudentPages = Math.max(
+    1,
+    Math.ceil(totalStudents / STUDENTS_PER_PAGE)
+  );
+  const startIdx = (studentPage - 1) * STUDENTS_PER_PAGE;
+  const currentStudents = filteredStudents.slice(
+    startIdx,
+    startIdx + STUDENTS_PER_PAGE
+  );
 
   return (
     <div className="container">
@@ -362,123 +452,178 @@ const ClassDetail = () => {
       </Modal>
 
       <hr />
-      <h5 style={{ cursor: "pointer" }} onClick={() => setShowCheckinTimeInputs(prev => !prev)}>
-        เปิดเวลาเช็คชื่อ {showCheckinTimeInputs ? "^" : "*"}
-      </h5>
+      <div className="mb-3">
+        <div className="d-flex justify-content-between align-items-center">
+          <h5 className="m-0"
+            style={{
+              color: "#ffffff",
+              fontWeight: 800,
+              letterSpacing: ".2px",
+              textShadow: "0 1px 2px rgba(0,0,0,.45)",
+            }}
+          >
+            เปิดเวลาเช็คชื่อ
+          </h5>
+          <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => setShowCheckinTimeInputs((s) => !s)} >
+            {showCheckinTimeInputs ? "ซ่อนการตั้งค่า ▲" : "แสดงการตั้งค่า ▼"}
+          </button>
+        </div>
 
-      {showCheckinTimeInputs && (
-        <div className="row mb-3 align-items-end">
-          <div className="col-md-3">
-            <input
-              type="datetime-local"
-              className="form-control"
-              value={classInfo.openAt ? formatDatetimeLocal(classInfo.openAt) : ""}
-              onChange={(e) => { updateField("openAt", e.target.value); e.target.blur(); }}
-            />
-          </div>
-          <div className="col-md-3">
-            <input
-              type="datetime-local"
-              className="form-control"
-              value={classInfo.closeAt ? formatDatetimeLocal(classInfo.closeAt) : ""}
-              onChange={(e) => { updateField("closeAt", e.target.value); e.target.blur(); }}
-            />
-          </div>
-          <div className="col-md-3">
-            <div className="form-check">
-              <input
-                type="checkbox"
-                className="form-check-input me-2"
-                checked={classInfo.withTeacherFace || false}
-                onChange={(e) => updateField("withTeacherFace", e.target.checked)}
-              /> ใบหน้าอาจารย์
-            </div>
-            <div className="form-check mt-1">
-              <input
-                type="checkbox"
-                className="form-check-input me-2"
-                checked={classInfo.withMapPreview || false}
-                onChange={(e) => updateField("withMapPreview", e.target.checked)}
-              /> ใช้แผนที่กำหนดตำแหน่ง
-            </div>
-          </div>
-          <div className="col-md-3">
-            <button className="btn btn-primary w-100" onClick={handleOpenSession}>เปิด</button>
-          </div>
-
-          {classInfo.withMapPreview && (
-            <div className="col-12 mt-3">
-              {/* พรีวิว Google Maps */}
-              <div className="position-relative" style={{ height: 250 }}>
-                <iframe
-                  width="100%"
-                  height="100%"
-                  loading="lazy"
-                  style={{ border: 0 }}               // ← เอา pointerEvents: "none" ออก ให้พรีวิวใช้งานได้
-                  allowFullScreen
-                  src={`https://maps.google.com/maps?q=${classInfo.latitude || 13.736717},${classInfo.longitude || 100.523186}&z=16&output=embed`}
-                  title="map-preview"
-                />
-                {/* ปุ่มลอยมุมขวาบน: เปิด Popup เลือกพิกัด */}
-                <button
-                  type="button"
-                  onClick={() => setShowMapPicker(true)}
-                  className="btn btn-success btn-sm"
-                  aria-label="เปิดแผนที่เพื่อเลือกจุด"
-                  style={{
-                    position: "absolute",
-                    right: 12,
-                    top: 12,
-                    zIndex: 2,
-                    borderRadius: 999,
-                    boxShadow: "0 2px 8px rgba(0,0,0,.25)",
-                    padding: "6px 12px",
+        {showCheckinTimeInputs && (
+          <div className="mt-3">
+            <div className="row g-3 align-items-end">
+              <div className="col-md-3">
+                <label className="form-label">เวลาเริ่ม</label>
+                <input
+                  type="datetime-local"
+                  className="form-control"
+                  value={classInfo.openAt ? formatDatetimeLocal(classInfo.openAt) : ""}
+                  onChange={(e) => {
+                    updateField("openAt", e.target.value);
+                    e.target.blur();
                   }}
-                >
-                  เปิดแผนที่
+                />
+              </div>
+
+              <div className="col-md-3">
+                <label className="form-label">เวลาสิ้นสุด</label>
+                <input
+                  type="datetime-local"
+                  className="form-control"
+                  value={classInfo.closeAt ? formatDatetimeLocal(classInfo.closeAt) : ""}
+                  onChange={(e) => {
+                    updateField("closeAt", e.target.value);
+                    e.target.blur();
+                  }}
+                />
+              </div>
+
+              <div className="col-md-3">
+                <div className="form-check mb-2">
+                  <input
+                    type="checkbox"
+                    className="form-check-input me-2"
+                    id="withTeacherFace"
+                    checked={classInfo.withTeacherFace || false}
+                    onChange={(e) =>
+                      updateField("withTeacherFace", e.target.checked)
+                    }
+                  />
+                  <label htmlFor="withTeacherFace" className="form-check-label">
+                    ใบหน้าอาจารย์
+                  </label>
+                </div>
+                <div className="form-check">
+                  <input
+                    type="checkbox"
+                    className="form-check-input me-2"
+                    id="withMapPreview"
+                    checked={classInfo.withMapPreview || false}
+                    onChange={(e) =>
+                      updateField("withMapPreview", e.target.checked)
+                    }
+                  />
+                  <label htmlFor="withMapPreview" className="form-check-label">
+                    ใช้แผนที่กำหนดตำแหน่ง
+                  </label>
+                </div>
+              </div>
+
+              <div className="col-md-3">
+                <label className="form-label opacity-0 d-block">เปิด</label>
+                <button className="btn btn-primary w-100" onClick={handleOpenSession}>
+                  เปิด
                 </button>
               </div>
-
-              <div className="mt-2">
-                ชื่อสถานที่
-                <input
-                  className="form-control mb-2"
-                  placeholder="ชื่อสถานที่"
-                  type="text"
-                  value={classInfo.locationName || ""}
-                  onChange={(e) => updateField("locationName", e.target.value)}
-                />
-                ละติจูด
-                <input
-                  className="form-control mb-2"
-                  placeholder="ละติจูด"
-                  type="number"
-                  step="0.000001"
-                  value={classInfo.latitude || ""}
-                  onChange={(e) => updateField("latitude", parseFloat(e.target.value))}
-                />
-                ลองจิจูด
-                <input
-                  className="form-control mb-2"
-                  placeholder="ลองจิจูด"
-                  type="number"
-                  step="0.000001"
-                  value={classInfo.longitude || ""}
-                  onChange={(e) => updateField("longitude", parseFloat(e.target.value))}
-                />
-                ระยะที่อนุญาต (เมตร)
-                <input
-                  className="form-control"
-                  placeholder="ระยะอนุญาต (เมตร)"
-                  type="number"
-                  value={classInfo.radius || 50}
-                  onChange={(e) => updateField("radius", parseInt(e.target.value))}
-                />
-              </div>
             </div>
-          )}
-        </div>
-      )}
+
+            {classInfo.withMapPreview && (
+              <div className="mt-3">
+                <div className="position-relative" style={{ height: 250 }}>
+                  <iframe
+                    width="100%"
+                    height="100%"
+                    loading="lazy"
+                    style={{ border: 0 }}
+                    allowFullScreen
+                    src={`https://maps.google.com/maps?q=${
+                      classInfo.latitude || 13.736717
+                    },${classInfo.longitude || 100.523186}&z=16&output=embed`}
+                    title="map-preview"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowMapPicker(true)}
+                    className="btn btn-success btn-sm"
+                    style={{
+                      position: "absolute",
+                      right: 12,
+                      top: 12,
+                      zIndex: 2,
+                      borderRadius: 999,
+                      boxShadow: "0 2px 8px rgba(0,0,0,.25)",
+                      padding: "6px 12px",
+                    }}
+                  >
+                    เปิดแผนที่
+                  </button>
+                </div>
+
+                <div className="row g-3 mt-2">
+                  <div className="col-md-3">
+                    <label className="form-label">ชื่อสถานที่</label>
+                    <input
+                      className="form-control"
+                      placeholder="ชื่อสถานที่"
+                      type="text"
+                      value={classInfo.locationName || ""}
+                      onChange={(e) => updateField("locationName", e.target.value)}
+                    />
+                  </div>
+                  <div className="col-md-3">
+                    <label className="form-label">ละติจูด</label>
+                    <input
+                      className="form-control"
+                      placeholder="ละติจูด"
+                      type="number"
+                      step="0.000001"
+                      value={classInfo.latitude || ""}
+                      onChange={(e) =>
+                        updateField("latitude", parseFloat(e.target.value))
+                      }
+                    />
+                  </div>
+                  <div className="col-md-3">
+                    <label className="form-label">ลองจิจูด</label>
+                    <input
+                      className="form-control"
+                      placeholder="ลองจิจูด"
+                      type="number"
+                      step="0.000001"
+                      value={classInfo.longitude || ""}
+                      onChange={(e) =>
+                        updateField("longitude", parseFloat(e.target.value))
+                      }
+                    />
+                  </div>
+                  <div className="col-md-3">
+                    <label className="form-label">ระยะที่อนุญาต (เมตร)</label>
+                    <input
+                      className="form-control"
+                      placeholder="ระยะอนุญาต (เมตร)"
+                      type="number"
+                      value={classInfo.radius || 50}
+                      onChange={(e) =>
+                        updateField("radius", parseInt(e.target.value))
+                      }
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Modal เลือกตำแหน่งบนแผนที่ (Leaflet) */}
       <Modal show={showMapPicker} onHide={() => setShowMapPicker(false)} size="lg" centered>
@@ -553,7 +698,21 @@ const ClassDetail = () => {
       </Modal>
 
       <hr />
-      <h5>คำร้องขอเข้าห้องเรียน</h5>
+      <div className="d-flex justify-content-between align-items-center mb-2">
+        <h5 className="m-0">คำร้องขอเข้าห้องเรียน</h5>
+        <div className="d-flex align-items-center gap-2">
+          <div className="form-check me-2">
+            <input type="checkbox" className="form-check-input" checked={allSelected} onChange={toggleAll} />
+            <label className="form-check-label">เลือกทั้งหมด</label>
+          </div>
+          <button className="btn btn-primary btn-sm" onClick={handleApproveSelected} disabled={[...selectedReq].length === 0} >
+            ยืนยันที่เลือก
+          </button>
+          <button className="btn btn-outline-danger btn-sm" onClick={handleRejectSelected} disabled={[...selectedReq].length === 0} >
+            ปฏิเสธที่เลือก
+          </button>
+        </div>
+      </div>
       {requests.length === 0 ? (
         <p className="text-muted">ไม่มีคำร้อง</p>
       ) : (
@@ -571,17 +730,53 @@ const ClassDetail = () => {
       )}
 
       <hr />
-      <h5>รายชื่อนักเรียน ({classInfo.students?.length || 0} คน)</h5>
-      {classInfo.students?.length === 0 ? (
-        <p className="text-muted">ยังไม่มีนักเรียนในห้องนี้</p>
+      <h5>รายชื่อนักเรียน ({totalStudents} คน)</h5>
+
+      {/* Search box */}
+      <div className="row g-2 align-items-center mb-2">
+        <div className="col-md-6 col-lg-4 ms-auto">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="ค้นหาชื่อหรือรหัสนักศึกษา..."
+            value={studentQuery}
+            onChange={(e) => setStudentQuery(e.target.value)}
+          />
+        </div>
+      </div>
+
+      {totalStudents === 0 ? (
+        <p className="text-muted">ไม่พบนักเรียนที่ตรงกับคำค้น</p>
       ) : (
-        <ul className="list-group">
-          {classInfo.students.map((s) => (
-            <li key={s._id} className="list-group-item">
-              {s.fullName} ({s.studentId || s.username})
-            </li>
-          ))}
-        </ul>
+        <>
+          <ul className="list-group">
+            {currentStudents.map((s) => (
+              <li key={s._id} className="list-group-item">
+                {s.fullName} ({s.studentId || s.username})
+              </li>
+            ))}
+          </ul>
+
+          <div className="d-flex justify-content-center align-items-center gap-2 mt-3">
+            <button
+              className="btn btn-outline-primary btn-sm"
+              onClick={() => setStudentPage((p) => Math.max(1, p - 1))}
+              disabled={studentPage === 1}
+            >
+              หน้าก่อนหน้า
+            </button>
+            <span className="page-indicator">
+              หน้า {studentPage} / {totalStudentPages}
+            </span>
+            <button
+              className="btn btn-outline-primary btn-sm"
+              onClick={() => setStudentPage((p) => Math.min(totalStudentPages, p + 1))}
+              disabled={studentPage === totalStudentPages}
+            >
+              หน้าถัดไป
+            </button>
+          </div>
+        </>
       )}
 
       <div className="d-flex justify-content-between mt-4">

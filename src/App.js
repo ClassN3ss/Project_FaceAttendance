@@ -19,9 +19,10 @@ import SavefaceTeacher from "./pages/SavefaceTeacher";
 import VerifyfaceTeacher from "./pages/VerifyfaceTeacher";
 import ClassHistoryList from "./pages/ClassHistoryList";
 import ClassHistoryDetail from "./pages/ClassHistoryDetail";
-import ManageListPage from "./pages/ManageListPage";
+import ManageListPage from "./pages/Usermanage";
 import NewRegister from "./pages/NewRegister";
 import Summary from "./pages/Summary";
+import StudentRequest from "./pages/StudentRequest"
 
 function App() {
   return (
@@ -74,6 +75,9 @@ function App() {
           } />
           <Route path="/summary" element={
               <ProtectedRoute role="teacher"><Summary /></ProtectedRoute>
+          } />
+          <Route path="/student-requests" element={
+              <ProtectedRoute role="admin"><StudentRequest /></ProtectedRoute>
           } />
         </Routes>
       </Router>
