@@ -85,8 +85,8 @@ const Saveface = () => {
 
   const captureImage = () => {
     const canvas = document.createElement("canvas");
-    canvas.width = 400;
-    canvas.height = 300;
+    canvas.width = videoEl.videoWidth;
+    canvas.height = videoEl.videoHeight;
     const ctx = canvas.getContext("2d");
     ctx.drawImage(videoRef.current, 0, 0, 400, 300);
     const dataUrl = canvas.toDataURL("image/jpeg");
