@@ -25,11 +25,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-<<<<<<< HEAD
       const res = await axios.post("https://be-attendance-ce925d697388.herokuapp.com/auth/login", {
-=======
-      const res = await axios.post("https://be-attendance-abb3a12f3db3.herokuapp.com/auth/login", {
->>>>>>> d528d498fe528cfaf0279e44263a49fe5c5609af
         username,
         password,
       });
