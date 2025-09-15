@@ -7,14 +7,11 @@ import "../styles/saveface.css";
 
 const directions = [
   { key: "front", message: "หันหน้าตรง" },
-  { key: "left", message: "เอียงหน้าซ้ายเล็กน้อย" },
-  { key: "right", message: "เอียงหน้าขวาเล็กน้อย" },
-  { key: "up", message: "เงยหน้าเล็กน้อย" },
-  { key: "down", message: "ก้มหน้าเล้กน้อย" },
+  { key: "left", message: "หันหน้าซ้าย" },
+  { key: "right", message: "หันหน้าขวา" },
+  { key: "up", message: "เงยหน้า" },
+  { key: "down", message: "ก้มหน้า" },
 ];
-
-// helper: ตรวจว่ามือถือหรือไม่
-const isMobile = () => /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
 const Saveface = () => {
   const videoRef = useRef(null);
@@ -26,6 +23,7 @@ const Saveface = () => {
   const [message, setMessage] = useState("กำลังโหลดกล้อง...");
   const [loading, setLoading] = useState(false);
 
+  // CHANGED: helper ปิดกล้องให้สะอาด ลด AbortError ตอน unmount
   const stopCameraInstant = (videoEl) => {
     const v = videoEl || videoRef.current;
     const stream = v?.srcObject;
@@ -36,13 +34,14 @@ const Saveface = () => {
     }
   };
 
+  // CHANGED: play เมื่อพร้อม ลด "play() request was interrupted"
   const playWhenReady = (videoEl) =>
     new Promise((resolve) => {
       if (!videoEl) return resolve();
       if (!videoEl.paused && !videoEl.ended) return resolve();
       const onCanPlay = () => {
         videoEl.removeEventListener("canplay", onCanPlay);
-        videoEl.play().catch(() => {});
+        videoEl.play().catch(() => {}); // เงียบ AbortError
         resolve();
       };
       videoEl.addEventListener("canplay", onCanPlay, { once: true });
@@ -55,6 +54,7 @@ const Saveface = () => {
 
     const initCamera = async () => {
       try {
+        // CHANGED: ขอแบบกล้องหน้า + audio=false
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: "user" },
           audio: false,
@@ -62,9 +62,10 @@ const Saveface = () => {
 
         const videoEl = videoRef.current;
         if (videoEl) {
+          // CHANGED: กัน race โดยเคลียร์ของเก่าก่อน
           stopCameraInstant(videoEl);
           videoEl.srcObject = stream;
-          await playWhenReady(videoEl);
+          await playWhenReady(videoEl); // รอจนพร้อมแล้วค่อย play
           setMessage(directions[0].message);
         }
       } catch (err) {
@@ -74,6 +75,8 @@ const Saveface = () => {
     };
 
     initCamera();
+
+    // CHANGED: จับอ้างอิง element ไว้ใช้ใน cleanup (แก้ warning ESLint)
     const videoEl = videoRef.current;
     return () => {
       stopCameraInstant(videoEl);
@@ -82,48 +85,20 @@ const Saveface = () => {
 
   const captureImage = () => {
     const canvas = document.createElement("canvas");
-
-    if (isMobile()) {
-      // ✅ Mobile → resize เล็กลง
-      canvas.width = 400;
-      canvas.height = 300;
-    } else {
-      // PC → ใช้ปกติ
-      canvas.width = 400;
-      canvas.height = 300;
-    }
-
+    canvas.width = 400;
+    canvas.height = 300;
     const ctx = canvas.getContext("2d");
-    ctx.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(videoRef.current, 0, 0, 400, 300);
+    const dataUrl = canvas.toDataURL("image/jpeg");
 
     const directionKey = directions[currentStep].key;
+    setCapturedImages((prev) => ({ ...prev, [directionKey]: dataUrl }));
 
-    if (isMobile()) {
-      canvas.toBlob(
-        (blob) => {
-          setCapturedImages((prev) => ({ ...prev, [directionKey]: blob }));
-          if (currentStep < directions.length - 1) {
-            setCurrentStep((prev) => prev + 1);
-            setMessage(directions[currentStep + 1].message);
-          } else {
-            handleSubmit({ ...capturedImages, [directionKey]: blob });
-          }
-        },
-        "image/jpeg",
-        
-      );
+    if (currentStep < directions.length - 1) {
+      setCurrentStep((prev) => prev + 1);
+      setMessage(directions[currentStep + 1].message);
     } else {
-      // ✅ PC → ใช้ JPEG แบบเดิม
-      const dataUrl = canvas.toDataURL("image/jpeg");
-      const blob = dataURLtoBlob(dataUrl);
-      setCapturedImages((prev) => ({ ...prev, [directionKey]: blob }));
-
-      if (currentStep < directions.length - 1) {
-        setCurrentStep((prev) => prev + 1);
-        setMessage(directions[currentStep + 1].message);
-      } else {
-        handleSubmit({ ...capturedImages, [directionKey]: blob });
-      }
+      handleSubmit({ ...capturedImages, [directionKey]: dataUrl });
     }
   };
 
@@ -132,10 +107,11 @@ const Saveface = () => {
     setMessage("⏳ กำลังส่งข้อมูล...");
 
     const formData = new FormData();
-    formData.append("fullname", user.fullname || user.fullName);
+    formData.append("fullname", user.fullname || user.fullName); // รองรับสองแบบ
     formData.append("studentID", user.studentID || user.studentId);
 
-    Object.entries(images).forEach(([key, blob]) => {
+    Object.entries(images).forEach(([key, base64]) => {
+      const blob = dataURLtoBlob(base64);
       formData.append(key, blob, `${key}.jpg`);
     });
 
