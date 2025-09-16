@@ -25,7 +25,7 @@ export default function ClassCreateModal({ onCreated }) {
     const isSectionInvalid = (section) => {
       if (section === '0') return true;
       if (section.startsWith('0')) return true;
-      if (/[\/\-\+]/.test(section)) return true;
+      if (/[-/+]/.test(section)) return true;
       return false;
     };
 

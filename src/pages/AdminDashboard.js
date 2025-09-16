@@ -8,7 +8,6 @@ import "../styles/admin.css";
 
 import ClassCreateModal from '../components/ClassCreateModal';
 import ClassList from '../components/ClassList';
-import RequestTable from '../components/RequestTable';
 import FaceScanHistory from '../components/FaceScanHistory';
 
 export default function AdminDashboard() {

@@ -9,6 +9,9 @@ export default function ClassList() {
   const [selectedClassId, setSelectedClassId] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
 
+  const [page, setPage] = useState(1);
+  const rowsPerPage = 10;
+
   const fetchClasses = async () => {
     const res = await API.get('/classes');
     setClasses(res.data);
@@ -35,6 +38,10 @@ export default function ClassList() {
   useEffect(() => {
     fetchClasses();
   }, []);
+
+  const startIndex = (page - 1) * rowsPerPage;
+  const paginatedData = classes.slice(startIndex, startIndex + rowsPerPage);
+  const totalPages = Math.ceil(classes.length / rowsPerPage);
 
   return (
     <div>
@@ -77,6 +84,28 @@ export default function ClassList() {
           ))}
         </tbody>
       </table>
+
+      {totalPages > 1 && (
+        <div className="d-flex justify-content-between align-items-center mt-3">
+          <button
+            className="btn btn-outline-primary btn-sm"
+            disabled={page === 1}
+            onClick={() => setPage(page - 1)}
+          >
+            หน้าก่อนหน้า
+          </button>
+
+          <span className="page-indicator">หน้า {page} / {totalPages}</span>
+
+          <button
+            className="btn btn-outline-primary btn-sm"
+            disabled={page === totalPages}
+            onClick={() => setPage(page + 1)}
+          >
+            หน้าถัดไป
+          </button>
+        </div>
+      )}
 
       <StudentListModal
         show={modalOpen}

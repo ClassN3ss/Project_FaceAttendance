@@ -30,6 +30,13 @@ const ClassDetail = () => {
   const [studentPage, setStudentPage] = useState(1);
   const [studentQuery, setStudentQuery] = useState("");
 
+  const [requestPage, setRequestPage] = useState(1);
+  const REQUESTS_PER_PAGE = 10;
+  const totalRequests = requests.length;
+  const totalRequestPages = Math.max(1, Math.ceil(totalRequests / REQUESTS_PER_PAGE));
+  const startReqIdx = (requestPage - 1) * REQUESTS_PER_PAGE;
+  const currentRequests = requests.slice(startReqIdx, startReqIdx + REQUESTS_PER_PAGE);
+
   const { user } = useAuth();
   const token = sessionStorage.getItem("token");
   const navigate = useNavigate();
@@ -57,7 +64,7 @@ const ClassDetail = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       const list = Array.isArray(res.data) ? res.data : res.data?.items || [];
-      const filtered = res.data.filter(r => r.classId?._id === id || r.classId === id);
+      const filtered = list.filter(r => r.classId?._id === id || r.classId === id);
       setRequests(filtered);
     } catch (err) {
       console.error("❌ โหลดคำร้องล้มเหลว", err);
@@ -465,28 +472,20 @@ const ClassDetail = () => {
       </Modal>
 
       <hr />
-      <div className="mb-3">
-        <div className="d-flex justify-content-between align-items-center">
-          <h5 className="m-0"
-            style={{
-              color: "#ffffff",
-              fontWeight: 800,
-              letterSpacing: ".2px",
-              textShadow: "0 1px 2px rgba(0,0,0,.45)",
-            }}
-          >
-            เปิดเวลาเช็คชื่อ
-          </h5>
-          <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => setShowCheckinTimeInputs((s) => !s)} >
-            {showCheckinTimeInputs ? "ซ่อนการตั้งค่า ▲" : "แสดงการตั้งค่า ▼"}
+      <div className="card border-0 shadow-sm rounded-4 mb-3">
+        <div className="card-header bg-transparent d-flex justify-content-between align-items-center">
+          <h5 className="m-0">เปิดเวลาเช็คชื่อ</h5>
+          <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => setShowCheckinTimeInputs(s => !s)} >
+            {showCheckinTimeInputs ? 'ซ่อนการตั้งค่า ▲' : 'แสดงการตั้งค่า ▼'}
           </button>
         </div>
 
         {showCheckinTimeInputs && (
           <div className="mt-3">
-            <div className="row g-3 align-items-end">
+            <div className="row g-3 align-items-center">
+              {/* เวลาเริ่ม */}
               <div className="col-md-3">
-                <label className="form-label">เวลาเริ่ม</label>
+                <label className="form-label fw-bold text-dark">เวลาเริ่ม</label>
                 <input
                   type="datetime-local"
                   className="form-control"
@@ -498,8 +497,9 @@ const ClassDetail = () => {
                 />
               </div>
 
+              {/* เวลาสิ้นสุด */}
               <div className="col-md-3">
-                <label className="form-label">เวลาสิ้นสุด</label>
+                <label className="form-label fw-bold text-dark">เวลาสิ้นสุด</label>
                 <input
                   type="datetime-local"
                   className="form-control"
@@ -511,40 +511,39 @@ const ClassDetail = () => {
                 />
               </div>
 
-              <div className="col-md-3">
-                <div className="form-check mb-2">
-                  <input
-                    type="checkbox"
-                    className="form-check-input me-2"
-                    id="withTeacherFace"
-                    checked={classInfo.withTeacherFace || false}
-                    onChange={(e) =>
-                      updateField("withTeacherFace", e.target.checked)
-                    }
-                  />
-                  <label htmlFor="withTeacherFace" className="form-check-label">
-                    ใบหน้าอาจารย์
-                  </label>
-                </div>
-                <div className="form-check">
-                  <input
-                    type="checkbox"
-                    className="form-check-input me-2"
-                    id="withMapPreview"
-                    checked={classInfo.withMapPreview || false}
-                    onChange={(e) =>
-                      updateField("withMapPreview", e.target.checked)
-                    }
-                  />
-                  <label htmlFor="withMapPreview" className="form-check-label">
-                    ใช้แผนที่กำหนดตำแหน่ง
-                  </label>
+              {/* ใบหน้าอาจารย์ */}
+              <div className="col-md-3 d-flex justify-content-center">
+                <div>
+                  <div className="form-check mb-2">
+                    <input
+                      type="checkbox"
+                      className="form-check-input me-2"
+                      id="withTeacherFace"
+                      checked={classInfo.withTeacherFace || false}
+                      onChange={(e) => updateField("withTeacherFace", e.target.checked)}
+                    />
+                    <label htmlFor="withTeacherFace" className="form-check-label text-dark">
+                      ใบหน้าอาจารย์
+                    </label>
+                  </div>
+                  <div className="form-check">
+                    <input
+                      type="checkbox"
+                      className="form-check-input me-2"
+                      id="withMapPreview"
+                      checked={classInfo.withMapPreview || false}
+                      onChange={(e) => updateField("withMapPreview", e.target.checked)}
+                    />
+                    <label htmlFor="withMapPreview" className="form-check-label text-dark">
+                      ใช้แผนที่กำหนดตำแหน่ง
+                    </label>
+                  </div>
                 </div>
               </div>
 
-              <div className="col-md-3">
-                <label className="form-label opacity-0 d-block">เปิด</label>
-                <button className="btn btn-primary w-100" onClick={handleOpenSession}>
+              {/* ปุ่มเปิด */}
+              <div className="col-md-3 d-flex justify-content-center align-items-center">
+                <button className="btn btn-success w-100" onClick={handleOpenSession}>
                   เปิด
                 </button>
               </div>
@@ -583,7 +582,7 @@ const ClassDetail = () => {
                 </div>
 
                 <div className="row g-3 mt-2">
-                  <div className="col-md-3">
+                  <div className="col-md-12">
                     <label className="form-label">ชื่อสถานที่</label>
                     <input
                       className="form-control"
@@ -593,7 +592,7 @@ const ClassDetail = () => {
                       onChange={(e) => updateField("locationName", e.target.value)}
                     />
                   </div>
-                  <div className="col-md-3">
+                  <div className="col-md-12">
                     <label className="form-label">ละติจูด</label>
                     <input
                       className="form-control"
@@ -606,7 +605,7 @@ const ClassDetail = () => {
                       }
                     />
                   </div>
-                  <div className="col-md-3">
+                  <div className="col-md-12">
                     <label className="form-label">ลองจิจูด</label>
                     <input
                       className="form-control"
@@ -619,7 +618,7 @@ const ClassDetail = () => {
                       }
                     />
                   </div>
-                  <div className="col-md-3">
+                  <div className="col-md-12">
                     <label className="form-label">ระยะที่อนุญาต (เมตร)</label>
                     <input
                       className="form-control"
@@ -712,39 +711,83 @@ const ClassDetail = () => {
 
       <hr />
       <div className="d-flex justify-content-between align-items-center mb-2">
-        <h5 className="m-0">คำร้องขอเข้าห้องเรียน</h5>
-        <div className="d-flex align-items-center gap-2">
-          <div className="form-check me-2">
-            <input type="checkbox" className="form-check-input" checked={allSelected} onChange={toggleAll} />
-            <label className="form-check-label">เลือกทั้งหมด</label>
+        {requests.length === 0 ? (
+          <h5 className="m-0 text-center w-100">คำร้องขอเข้าห้องเรียน</h5>
+        ) : (
+          <h5 className="m-0 text-start">คำร้องขอเข้าห้องเรียน</h5>
+        )}
+        {requests.length > 0 && (
+          <div className="d-flex align-items-center gap-2">
+            <div className="form-check me-2">
+              <input
+                type="checkbox"
+                className="form-check-input"
+                checked={allSelected}
+                onChange={toggleAll}
+              />
+              <label className="form-check-label">เลือกทั้งหมด</label>
+            </div>
+            <button
+              className={`btn btn-sm ${[...selectedReq].length === 0 ? "btn-outline-success" : "btn-success"}`}
+              onClick={handleApproveSelected}
+              disabled={[...selectedReq].length === 0}
+            >
+              ยืนยันที่เลือก
+            </button>
+            <button
+              className="btn btn-outline-danger btn-sm"
+              onClick={handleRejectSelected}
+              disabled={[...selectedReq].length === 0}
+            >
+              ปฏิเสธที่เลือก
+            </button>
           </div>
-          <button className="btn btn-primary btn-sm" onClick={handleApproveSelected} disabled={[...selectedReq].length === 0} >
-            ยืนยันที่เลือก
-          </button>
-          <button className="btn btn-outline-danger btn-sm" onClick={handleRejectSelected} disabled={[...selectedReq].length === 0} >
-            ปฏิเสธที่เลือก
-          </button>
-        </div>
+        )}
       </div>
       {requests.length === 0 ? (
         <p className="text-muted">ไม่มีคำร้อง</p>
       ) : (
-        <ul className="list-group mb-4">
-          {requests.map((r) => (
-            <li key={r._id} className="list-group-item d-flex justify-content-between align-items-center" >
-              <div className="d-flex align-items-center gap-3">
-                <input type="checkbox" className="form-check-input" checked={selectedReq.has(r._id)} onChange={() => toggleOne(r._id)} />
-                <span>
-                  {r.student?.fullName} ({r.student?.studentId})
-                </span>
-              </div>
-              <div>
-                <button className="btn btn-success btn-sm me-2" onClick={() => handleApprove(r._id)} > ✅ อนุมัติ </button>
-                <button className="btn btn-danger btn-sm" onClick={() => handleReject(r._id)} > ❌ ปฏิเสธ </button>
-              </div>
-            </li>
-          ))}
-        </ul>
+        <div>
+          <ul className="list-group mb-4">
+            {currentRequests.map((r) => (
+              <li key={r._id} className="list-group-item d-flex justify-content-between align-items-center">
+                <div className="d-flex align-items-center gap-3">
+                  <input
+                    type="checkbox"
+                    className="form-check-input"
+                    checked={selectedReq.has(r._id)}
+                    onChange={() => toggleOne(r._id)}
+                  />
+                  <span>{r.student?.fullName} ({r.student?.studentId})</span>
+                </div>
+                <div>
+                  <button className="btn btn-success btn-sm me-2" onClick={() => handleApprove(r._id)}>✅ อนุมัติ</button>
+                  <button className="btn btn-danger btn-sm" onClick={() => handleReject(r._id)}>❌ ปฏิเสธ</button>
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          {totalRequestPages > 1 && (
+            <div className="d-flex justify-content-center align-items-center gap-2 mt-2">
+              <button
+                className="btn btn-outline-primary btn-sm"
+                onClick={() => setRequestPage((p) => Math.max(1, p - 1))}
+                disabled={requestPage === 1}
+              >
+                หน้าก่อนหน้า
+              </button>
+              <span className="page-indicator">หน้า {requestPage} / {totalRequestPages}</span>
+              <button
+                className="btn btn-outline-primary btn-sm"
+                onClick={() => setRequestPage((p) => Math.min(totalRequestPages, p + 1))}
+                disabled={requestPage === totalRequestPages}
+              >
+                หน้าถัดไป
+              </button>
+            </div>
+          )}
+        </div>
       )}
 
       <hr />

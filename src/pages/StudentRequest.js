@@ -28,6 +28,8 @@ export default function StudentRequest() {
   );
   const totalPages = Math.max(1, Math.ceil(requests.length / PAGE_SIZE));
 
+  const selectedCountOnPage = pageItems.filter(r => selected.has(r._id)).length;
+
   useEffect(() => { fetchRequests(); }, []);
   useEffect(() => { setSelected(new Set()); }, [page]);
 
@@ -101,9 +103,8 @@ export default function StudentRequest() {
   };
 
   return (
-    <section className="request-shell">
-      <h5 className="text-center mt-3 mb-2">คำร้องขอเข้าเรียน</h5>
-      <div className="card">
+    <section className="container">
+      <h4 className="text-center mt-3 mb-2">คำร้องขอเข้าเรียน</h4>
         <table className="table table-bordered table-sm">
           <thead>
             <tr>
@@ -138,6 +139,7 @@ export default function StudentRequest() {
                     <button onClick={() => handleApprove(req._id)} className="btn btn-primary btn-sm" title="อนุมัติ" >
                       ✅
                     </button>
+                    <br /><br />
                     <button onClick={() => handleReject(req._id)} className="btn btn-outline-danger btn-sm ms-1" title="ปฏิเสธ" >
                       ❌
                     </button>
@@ -147,23 +149,37 @@ export default function StudentRequest() {
             )}
           </tbody>
         </table>
-      </div>
+        <div className="d-flex justify-content-end mt-3">
+          <button className="btn btn-primary btn-sm" onClick={handleApproveSelected} disabled={pageItems.every((r) => !selected.has(r._id))}>
+            ยืนยันที่เลือก {selectedCountOnPage > 0 && `(${selectedCountOnPage})`}
+          </button>
+        </div>
+      
 
-      <div className="page-actions">
-        <button className="btn btn-outline-primary btn-sm" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} >
-          หน้าก่อนหน้า
-        </button>
+      {totalPages > 1 && (
+        <div className="d-flex justify-content-between align-items-center mt-4 mb-5">
+          <button
+            className="btn btn-outline-primary btn-sm"
+            disabled={page === 1}
+            onClick={() => setPage(page - 1)}
+          >
+            หน้าก่อนหน้า
+          </button>
 
-        <span className="page-indicator">หน้า {page} / {totalPages}</span>
+          <span className="page-indicator">
+            หน้า {page} / {totalPages}
+          </span>
 
-        <button className="btn btn-primary btn-sm" onClick={handleApproveSelected} disabled={pageItems.every((r) => !selected.has(r._id))} >
-          ยืนยันที่เลือก (หน้านี้)
-        </button>
+          <button
+            className="btn btn-outline-primary btn-sm"
+            disabled={page === totalPages}
+            onClick={() => setPage(page + 1)}
+          >
+            หน้าถัดไป
+          </button>
+        </div>
+      )}
 
-        <button className="btn btn-outline-primary btn-sm" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages} >
-          หน้าถัดไป
-        </button>
-      </div>
     </section>
   );
 }

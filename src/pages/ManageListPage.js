@@ -179,7 +179,9 @@ export default function ManageListPage() {
               </tbody>
             </Table>
 
-            <FooterPager page={page} total={total} onPrev={onPrev} onNext={onNext} />
+            {total > 1 && (
+              <FooterPager page={page} total={total} onPrev={onPrev} onNext={onNext} />
+            )}
           </>
         )}
       </Card.Body>

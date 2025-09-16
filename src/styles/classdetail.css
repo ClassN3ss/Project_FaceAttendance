@@ -124,3 +124,10 @@ input[type="checkbox"].form-check-input {
   color: #1f2937; /* สีเทาเข้ม */
   font-weight: 600;
 }
+
+.card .form-label,
+.card .form-check-label,
+.card .card-header h5 {
+  color: #22c55e !important;  /* ดำเข้ม */
+  font-weight: 600;          /* ตัวหนากลางๆ */
+}
