@@ -334,7 +334,6 @@ const ClassDetail = () => {
       console.error(err);
       alert("อนุมัติไม่สำเร็จ");
     }
-    window.location.reload();
   };
 
   const handleReject = async (reqId) => {
@@ -352,7 +351,6 @@ const ClassDetail = () => {
       console.error(err);
       alert("ปฏิเสธไม่สำเร็จ");
     }
-    window.location.reload();
   };
 
   const allSelected = requests.length > 0 && requests.every((r) => selectedReq.has(r._id));
@@ -383,6 +381,7 @@ const ClassDetail = () => {
       console.error(e);
       alert("ยืนยันที่เลือกไม่สำเร็จ");
     }
+    window.location.reload();
   };
 
   const handleRejectSelected = async () => {
@@ -402,6 +401,7 @@ const ClassDetail = () => {
       console.error(e);
       alert("ปฏิเสธที่เลือกไม่สำเร็จ");
     }
+    window.location.reload();
   };
 
   if (loading) return <div className="container mt-4">กำลังโหลดข้อมูลห้อง...</div>;
