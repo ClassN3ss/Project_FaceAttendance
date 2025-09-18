@@ -16,7 +16,7 @@ const Register = () => {
 
   // แก้ pattern สำหรับรูปแบบใหม่ เช่น 64-040626-3635-8
   const studentIdPattern = /^\d{2}-\d{6}-\d{4}-\d{1}$/;
-  const fullNamePattern = /^(นาย|นางสาว|นาง)[^\s]+ [^\s]+$/;
+  const fullNamePattern = /^(นาย|นางสาว|นาง)[^\s]+(?:\s{1,2})[^\s]+$/;
 
   const isStudentIdValid = studentIdPattern.test(studentId.trim());
   const isFullNameValid = fullNamePattern.test(fullName.trim());
