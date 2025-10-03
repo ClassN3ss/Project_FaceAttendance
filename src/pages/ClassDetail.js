@@ -381,7 +381,6 @@ const ClassDetail = () => {
       console.error(e);
       alert("ยืนยันที่เลือกไม่สำเร็จ");
     }
-    window.location.reload();
   };
 
   const handleRejectSelected = async () => {
@@ -401,7 +400,6 @@ const ClassDetail = () => {
       console.error(e);
       alert("ปฏิเสธที่เลือกไม่สำเร็จ");
     }
-    window.location.reload();
   };
 
   if (loading) return <div className="container mt-4">กำลังโหลดข้อมูลห้อง...</div>;
