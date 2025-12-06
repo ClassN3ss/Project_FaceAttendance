@@ -10,7 +10,7 @@ const directions = [
   { key: "left", message: "เอียงหน้าซ้ายเล็กน้อย" },
   { key: "right", message: "เอียงหน้าขวาเล็กน้อย" },
   { key: "up", message: "เงยหน้าเล็กน้อย" },
-  { key: "down", message: "ก้มหน้าเล้กน้อย" },
+  { key: "down", message: "ก้มหน้าเล็กน้อย" },
 ];
 
 const Saveface = () => {

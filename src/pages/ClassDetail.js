@@ -104,7 +104,7 @@ const ClassDetail = () => {
       if (now >= closeTime) {
         clearInterval(interval);
         setActiveSession(null);
-        window.location.reload(); // ✅ รีเฟรชเมื่อหมดเวลา session
+        window.location.reload();
       }
     }, 2000);
   
