@@ -39,7 +39,7 @@ export default function ClassList() {
     fetchClasses();
   }, []);
 
-  const startIndex = (page - 1) * rowsPerPage;
+  // const startIndex = (page - 1) * rowsPerPage;
   // const paginatedData = classes.slice(startIndex, startIndex + rowsPerPage);
   const totalPages = Math.ceil(classes.length / rowsPerPage);
 
