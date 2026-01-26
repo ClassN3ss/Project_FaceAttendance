@@ -120,7 +120,7 @@ const Saveface = () => {
     console.log("🚀 handleSubmit() called with images keys:", Object.keys(images));
 
     try {
-      const res = await fetch(`https://be-attendance-ce925d697388.herokuapp.com/auth/save-face-model`, {
+      const res = await fetch(`https://backend-faceattendance-v97x.onrender.com/auth/save-face-model`, {
         method: "POST",
         body: formData,
       });
